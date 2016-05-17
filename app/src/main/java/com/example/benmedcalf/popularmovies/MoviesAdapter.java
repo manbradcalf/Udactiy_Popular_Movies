@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.example.benmedcalf.popularmovies.MoviesGridFragment.MovieViewHolder;
 import com.squareup.picasso.Picasso;
 
@@ -21,6 +22,7 @@ public class MoviesAdapter
     private List<Movie> mMovieList;
     private LayoutInflater mInflater;
     private Context mContext;
+    public static final String BASE_URL = "http://api.themoviedb.org/3/";
 
     public MoviesAdapter(Context context) {
         this.mContext = context;
@@ -40,7 +42,7 @@ public class MoviesAdapter
 
         Movie movie = mMovieList.get(position);
         Picasso.with(mContext)
-                .load(movie.getPoster())
+                .load(BASE_URL + movie.getPosterPath())
                 .placeholder(R.color.colorAccent)
                 .into(holder.mImageView);
     }

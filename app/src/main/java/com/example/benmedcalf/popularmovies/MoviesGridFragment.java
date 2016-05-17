@@ -10,8 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import java.util.ArrayList;
+import com.example.benmedcalf.popularmovies.Model.Movie;
+
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by ben.medcalf on 5/8/16.
@@ -20,6 +27,10 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
+    public static final String BASE_URL = "http://api.themoviedb.org/3/";
+    private List<Movie> mMovieList;
+    private static final String TAG = "MOVIESGRIDFRAGMENT";
+
 
     public MoviesGridFragment() {
 
@@ -41,13 +52,27 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         mMoviesAdapter = new MoviesAdapter(getContext());
         mRecyclerView.setAdapter(mMoviesAdapter);
 
-        List<Movie> movies = new ArrayList<>();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        for (int i = 0; i < 20; i++) {
-            movies.add(new Movie());
-        }
+        MoviesDataBaseAPI service = retrofit.create(MoviesDataBaseAPI.class);
 
-        mMoviesAdapter.setMovieList(movies);
+        final Call<MoviesResponse> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
+
+        call.enqueue(new Callback<MoviesResponse>() {
+            @Override
+            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
+                MoviesResponse.parseJSON(response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<MoviesResponse> call, Throwable t) {
+
+            }
+        });
+
 
 
         return view;
