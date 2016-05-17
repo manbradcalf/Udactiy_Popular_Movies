@@ -13,7 +13,7 @@ public interface MoviesDataBaseAPI {
 
     //Returns JSON for top rated movies
     @GET("movie/top_rated")
-    public Call<MoviesResponse> getTopRated(@Query("api_key") String api_key);
+    public Call<Example> getTopRated(@Query("api_key") String api_key);
 
     //Returns JSON for most popular movies
     @GET("movie/popular")

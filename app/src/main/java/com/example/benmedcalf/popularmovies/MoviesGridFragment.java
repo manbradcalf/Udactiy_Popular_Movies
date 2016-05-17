@@ -50,34 +50,10 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mMoviesAdapter = new MoviesAdapter(getContext());
+
+        callDB();
+
         mRecyclerView.setAdapter(mMoviesAdapter);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        MoviesDataBaseAPI service = retrofit.create(MoviesDataBaseAPI.class);
-
-       Call<Example> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
-
-        call.enqueue(new Callback<Example>() {
-            @Override
-            public void onResponse(Call<Example> call, Response<Example> response) {
-                Example example;
-                example = response.body();
-                List<Movie> movies = example.getResults();
-
-                mMoviesAdapter.setMovieList(movies);
-            }
-
-            @Override
-            public void onFailure(Call<Example> call, Throwable t) {
-
-            }
-        });
-
-
 
         return view;
 
@@ -104,4 +80,30 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         }
     }
 
+    private void callDB() {
+
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
+    MoviesDataBaseAPI service = retrofit.create(MoviesDataBaseAPI.class);
+
+    Call<Example> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
+
+    call.enqueue(new Callback<Example>() {
+        @Override
+        public void onResponse(Call<Example> call, Response<Example> response) {
+            Example example = response.body();
+            List<Movie> movies = example.getResults();
+
+            mMoviesAdapter.setMovieList(movies);
+            }
+
+        @Override
+        public void onFailure(Call<Example> call, Throwable t) {
+
+        }
+        });
+    }
 }

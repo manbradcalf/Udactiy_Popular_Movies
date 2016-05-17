@@ -22,7 +22,7 @@ public class MoviesAdapter
     private List<Movie> mMovieList;
     private LayoutInflater mInflater;
     private Context mContext;
-    public static final String BASE_URL = "http://api.themoviedb.org/3/";
+    public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
 
     public MoviesAdapter(Context context) {
         this.mContext = context;
@@ -42,7 +42,7 @@ public class MoviesAdapter
 
         Movie movie = mMovieList.get(position);
         Picasso.with(mContext)
-                .load(BASE_URL + movie.getPosterPath())
+                .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
                 .placeholder(R.color.colorAccent)
                 .into(holder.mImageView);
     }
