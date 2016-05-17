@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.benmedcalf.popularmovies.Model.Example;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 
 import java.util.List;
@@ -28,7 +29,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
-    private List<Movie> mMovieList;
     private static final String TAG = "MOVIESGRIDFRAGMENT";
 
 
@@ -59,16 +59,20 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         MoviesDataBaseAPI service = retrofit.create(MoviesDataBaseAPI.class);
 
-        final Call<MoviesResponse> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
+       Call<Example> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
 
-        call.enqueue(new Callback<MoviesResponse>() {
+        call.enqueue(new Callback<Example>() {
             @Override
-            public void onResponse(Call<MoviesResponse> call, Response<MoviesResponse> response) {
-                MoviesResponse.parseJSON(response.toString());
+            public void onResponse(Call<Example> call, Response<Example> response) {
+                Example example;
+                example = response.body();
+                List<Movie> movies = example.getResults();
+
+                mMoviesAdapter.setMovieList(movies);
             }
 
             @Override
-            public void onFailure(Call<MoviesResponse> call, Throwable t) {
+            public void onFailure(Call<Example> call, Throwable t) {
 
             }
         });

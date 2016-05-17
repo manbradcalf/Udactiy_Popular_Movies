@@ -1,5 +1,7 @@
 package com.example.benmedcalf.popularmovies;
 
+import com.example.benmedcalf.popularmovies.Model.Example;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
@@ -15,7 +17,7 @@ public interface MoviesDataBaseAPI {
 
     //Returns JSON for most popular movies
     @GET("movie/popular")
-    public Call<MoviesResponse>  getMostPopular(@Query("api_key") String api_key);
+    public Call<Example>  getMostPopular(@Query("api_key") String api_key);
 }
 
 
