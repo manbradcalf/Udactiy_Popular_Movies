@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_margin="8dp"
-    card_view:cardCornerRadius="4dp">
+    android:layout_margin="8dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -38,8 +37,12 @@
             android:layout_alignParentBottom="true"
             android:layout_below="@+id/poster_image_view"
             android:numStars="5"
-            android:stepSize="1"
+            android:stepSize="0.25"
             android:rating="3.5"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
 
     </RelativeLayout>

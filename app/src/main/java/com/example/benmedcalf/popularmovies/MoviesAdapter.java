@@ -22,7 +22,9 @@ public class MoviesAdapter
     private List<Movie> mMovieList;
     private LayoutInflater mInflater;
     private Context mContext;
+    public static final String BASE_URL = "http://api.themoviedb.org/3/";
     public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
+
 
     public MoviesAdapter(Context context) {
         this.mContext = context;
@@ -32,7 +34,7 @@ public class MoviesAdapter
 
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.movie_poster, parent, false);
+        View view = mInflater.inflate(R.layout.movie_card, parent, false);
         MovieViewHolder viewHolder = new MovieViewHolder(view);
         return viewHolder;
     }
@@ -40,11 +42,22 @@ public class MoviesAdapter
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
 
+        Float rating;
+
         Movie movie = mMovieList.get(position);
+
+        //Set the movie so the ViewHolder's onClickListener can create an intent to detail actiity
+        holder.setMovie(movie);
+
+        //Load image
         Picasso.with(mContext)
                 .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .placeholder(R.color.colorAccent)
-                .into(holder.mImageView);
+                .placeholder(R.color.colorAccent).into(holder.mImageView);
+
+
+        //Calculate movie's rating on a 5 star scale and set it to the star rating view on the card
+        rating = movie.getPopularity()/2/10;
+        holder.mRatingBar.setRating(rating);
     }
 
     @Override

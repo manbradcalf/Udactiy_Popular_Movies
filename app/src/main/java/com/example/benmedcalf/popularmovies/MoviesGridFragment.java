@@ -1,5 +1,6 @@
 package com.example.benmedcalf.popularmovies;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 
 import com.example.benmedcalf.popularmovies.Model.Example;
 import com.example.benmedcalf.popularmovies.Model.Movie;
@@ -18,8 +20,6 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by ben.medcalf on 5/8/16.
@@ -28,8 +28,10 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
+    private List<Movie> mMoviesList;
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     private static final String TAG = "MOVIESGRIDFRAGMENT";
+    public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
 
 
     public MoviesGridFragment() {
@@ -70,40 +72,46 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         menuInflater.inflate(R.menu.menu_movies_grid_fragment, menu);
     }
 
-    public static class MovieViewHolder extends RecyclerView.ViewHolder {
+    private void callDB() {
+
+        MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
+
+        Call<Example> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
+
+        call.enqueue(new Callback<Example>() {
+            @Override
+            public void onResponse(Call<Example> call, Response<Example> response) {
+                Example example = response.body();
+                mMoviesList = example.getResults();
+
+                mMoviesAdapter.setMovieList(mMoviesList);
+            }
+
+            @Override
+            public void onFailure(Call<Example> call, Throwable t) {
+
+            }
+        });
+    }
+
+    public static class MovieViewHolder extends RecyclerView.ViewHolder
+    {
 
         public ImageView mImageView;
+        public RatingBar mRatingBar;
+        public Movie mMovie;
+        private Context context;
+
+        public void setMovie(Movie movie) {
+            mMovie = movie;
+        }
 
         public MovieViewHolder(View itemView) {
             super(itemView);
+            context = itemView.getContext();
             mImageView = (ImageView) itemView.findViewById(R.id.poster_image_view);
+            mRatingBar = (RatingBar) itemView.findViewById(R.id.ratingBar);
         }
-    }
 
-    private void callDB() {
-
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
-
-    MoviesDataBaseAPI service = retrofit.create(MoviesDataBaseAPI.class);
-
-    Call<Example> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
-
-    call.enqueue(new Callback<Example>() {
-        @Override
-        public void onResponse(Call<Example> call, Response<Example> response) {
-            Example example = response.body();
-            List<Movie> movies = example.getResults();
-
-            mMoviesAdapter.setMovieList(movies);
-            }
-
-        @Override
-        public void onFailure(Call<Example> call, Throwable t) {
-
-        }
-        });
     }
 }
