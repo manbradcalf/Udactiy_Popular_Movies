@@ -56,6 +56,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mMoviesAdapter = new MoviesAdapter(getContext());
 
+        //TODO: Find a way to make this call dynamic depending on popular or top rate
         callDB();
 
         mRecyclerView.setAdapter(mMoviesAdapter);
@@ -79,14 +80,15 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
 
+        //TODO: find a way to store this API key somewhere safe
         Call<Example> call = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
 
         call.enqueue(new Callback<Example>() {
             @Override
             public void onResponse(Call<Example> call, Response<Example> response) {
                 Example example = response.body();
-                mMoviesList = example.getResults();
 
+                mMoviesList = example.getResults();
                 mMoviesAdapter.setMovieList(mMoviesList);
             }
 
@@ -101,13 +103,11 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     // View Holder Class
 
     public class MovieViewHolder extends RecyclerView.ViewHolder
-        implements View.OnClickListener
-    {
+            implements View.OnClickListener {
 
         public ImageView mImageView;
         public RatingBar mRatingBar;
         public Movie mMovie;
-        private Context context;
 
         public void setMovie(Movie movie) {
             mMovie = movie;
@@ -115,7 +115,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         public MovieViewHolder(View itemView) {
             super(itemView);
-            context = itemView.getContext();
             mImageView = (ImageView) itemView.findViewById(R.id.poster_image_view);
             mRatingBar = (RatingBar) itemView.findViewById(R.id.ratingBar);
             itemView.setOnClickListener(this);
@@ -123,7 +122,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = MovieDetailActivity.newIntent(context, mMovie);
+            Intent intent = MovieDetailActivity.newIntent(getActivity(), mMovie);
             startActivity(intent);
         }
     }
@@ -170,7 +169,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
 
             //Calculate movie's rating on a 5 star scale and set it to the star rating view on the card
-            rating = movie.getPopularity()/2/10;
+            rating = movie.getPopularity() / 2 / 10;
             holder.mRatingBar.setRating(rating);
         }
 
