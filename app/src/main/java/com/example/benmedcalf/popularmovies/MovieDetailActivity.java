@@ -2,6 +2,8 @@ package com.example.benmedcalf.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 
 import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 /**
  * Created by ben.medcalf on 5/8/16.
@@ -40,13 +43,30 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         mDescription = (TextView) findViewById(R.id.description);
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-
+        mCollapsingToolbarLayout.setTitle(movie.getTitle());
         mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
+
+        //first answer here
+        // http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso
         Picasso.with(this)
                 .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .placeholder(R.color.colorAccent)
-                .into(mPoster);
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+
+                        mPoster.setImageBitmap(bitmap);
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                    }
+                });
 
         mDescription.setText(description);
 
