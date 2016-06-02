@@ -3,4 +3,5 @@
     <string name="sort_popularity_title">Sort By Popularity</string>
     <string name="sort_rating_title">Sort By Rating</string>
     <string name="movieposter">MoviePoster</string>
+    <string name="movie_poster_in_detail_view">Movie Poster in detail view</string>
 </resources>

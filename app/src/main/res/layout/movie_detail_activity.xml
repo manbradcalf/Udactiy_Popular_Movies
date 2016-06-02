@@ -10,8 +10,7 @@
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:fitsSystemWindows="true">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
@@ -24,19 +23,20 @@
             android:fitsSystemWindows="true">
 
         <ImageView
+            android:contentDescription="@string/movie_poster_in_detail_view"
             android:id="@+id/movie_poster_detail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scaleType="centerCrop"
             android:fitsSystemWindows="true"
-            app:layout_collapseMode="parallax"/>
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scaleType="centerCrop"
+            app:layout_collapseMode="parallax" />
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:layout_collapseMode="pin" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_collapseMode="parallax"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -63,10 +63,31 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/description"
-                    android:layout_width="match_parent"
+                    android:id="@+id/movie_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="30dp"
+                    android:textStyle="bold"
+                    android:textSize="24sp"
+                    android:paddingTop="24dp"
+                    android:paddingBottom="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingLeft="16dp"/>
+                
+                <TextView
+                    android:id="@+id/release_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="12dp"
+                    android:paddingRight="16dp"
+                    android:paddingLeft="16dp"/>
+
+
+                <TextView
+                    android:id="@+id/description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="14sp"
+                    android:padding="16dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
             </LinearLayout>

@@ -6,7 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,8 +25,11 @@ public class MovieDetailActivity extends AppCompatActivity {
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
     public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
     public TextView mDescription;
+    public TextView mTitle;
+    public TextView mReleaseDate;
     public ImageView mPoster;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
+    public Toolbar mToolbar;
 
     public static Intent newIntent(Context packageContext, Movie movie) {
         Intent intent = new Intent(packageContext, MovieDetailActivity.class);
@@ -42,12 +47,17 @@ public class MovieDetailActivity extends AppCompatActivity {
         String description = movie.getOverview();
 
         mDescription = (TextView) findViewById(R.id.description);
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        mCollapsingToolbarLayout.setTitle(movie.getTitle());
+        mTitle = (TextView) findViewById(R.id.movie_title);
         mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
+        mReleaseDate = (TextView ) findViewById(R.id.release_date);
+        mTitle.setText(movie.getTitle());
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+        ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), "IMAGE-APP-BAR");
 
-        //first answer here
-        // http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso
+
+//      first answer here
+//      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso
         Picasso.with(this)
                 .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
                 .into(new Target() {
