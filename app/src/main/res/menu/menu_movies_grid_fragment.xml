@@ -10,5 +10,4 @@
         android:title="@string/sort_rating_title"
         app:showAsAction="never"/>
 
-
 </menu>

@@ -9,6 +9,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -50,6 +51,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         mReleaseDate = (TextView) findViewById(R.id.release_date);
 
         mTitle.setText(movie.getTitle());
+        String releaseDateText = "Released: " + movie.getReleaseDate();
+        mReleaseDate.setText(releaseDateText);
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
         mCollapsingToolbarLayout.setTitle(movie.getTitle());
@@ -83,5 +86,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         mDescription.setText(description);
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
