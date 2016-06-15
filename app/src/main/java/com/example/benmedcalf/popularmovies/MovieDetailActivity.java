@@ -23,7 +23,7 @@ import com.squareup.picasso.Target;
 public class MovieDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
-    public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
+    public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w342/";
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
