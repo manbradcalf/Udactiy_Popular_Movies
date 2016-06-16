@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.example.benmedcalf.popularmovies.Model.Movie;
@@ -28,6 +29,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mTitle;
     public TextView mReleaseDate;
     public ImageView mPoster;
+    public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
 
     public static Intent newIntent(Context packageContext, Movie movie) {
@@ -49,6 +51,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mTitle = (TextView) findViewById(R.id.movie_title);
         mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
         mReleaseDate = (TextView) findViewById(R.id.release_date);
+        mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
 
         mTitle.setText(movie.getTitle());
         String releaseDateText = "Released: " + movie.getReleaseDate();
@@ -56,6 +59,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
         mCollapsingToolbarLayout.setTitle(movie.getTitle());
+        mDescription.setText(description);
+        mRatingBar.setRating(movie.getVoteAverage()/2);
 
         setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -74,6 +79,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                     @Override
                     public void onBitmapFailed(Drawable errorDrawable) {
+                        Log.d("onBitmapFailed",": Bitmap failed!");
 
                     }
 
@@ -82,8 +88,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                     }
                 });
-
-        mDescription.setText(description);
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
     }
