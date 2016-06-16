@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.benmedcalf.popularmovies.Model.Example;
 import com.example.benmedcalf.popularmovies.Model.Movie;
@@ -35,9 +36,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     private MoviesAdapter mMoviesAdapter;
     private List<Movie> mMoviesList;
     private Toolbar mToolbar;
-    public static final String BASE_URL = "http://api.themoviedb.org/3/";
-    private static final String TAG = "MOVIESGRIDFRAGMENT";
-    public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
     public static final int SORT_POPULARITY_TAG = 0;
     public static final int SORT_TOP_RATED_TAG = 1;
     private int mSortPreference;
@@ -53,23 +51,29 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         if (savedInstanceState != null) {
-        mSortPreference = savedInstanceState.getInt(SORT_TYPE);}
+            mSortPreference = savedInstanceState.getInt(SORT_TYPE);
+        }
         callDB(mSortPreference);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_movie_grid, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.movies_recycler_view);
+
+        //Set up toolbar and make it a SupportActionBar to enable menu options
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mToolbar.setTitle("Popular Movies");
-        ((AppCompatActivity)getActivity()).setSupportActionBar(mToolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+
+        //Create gridlayoutmanager and set it to the recyclerview
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         mRecyclerView.setLayoutManager(gridLayoutManager);
+
+        //Create Movies adapter and set it to the recyclerview
         mMoviesAdapter = new MoviesAdapter(getContext());
-
-
         mRecyclerView.setAdapter(mMoviesAdapter);
 
         return view;
@@ -79,7 +83,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        //updateMovies();
     }
 
     @Override
@@ -89,7 +92,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch(menuItem.getItemId()) {
+        switch (menuItem.getItemId()) {
 
             case R.id.sort_popularity:
                 callDB(SORT_POPULARITY_TAG);
@@ -109,7 +112,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
 
-        switch(sort_tag) {
+        switch (sort_tag) {
             case SORT_POPULARITY_TAG:
                 Call<Example> call_popular = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
                 call_popular.enqueue(new Callback<Example>() {
@@ -124,6 +127,9 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
                     @Override
                     public void onFailure(Call<Example> call, Throwable t) {
+                        t.printStackTrace();
+                        Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
+                        toast.show();
 
                     }
                 });
@@ -134,6 +140,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
                 call_top_rated.enqueue(new Callback<Example>() {
                     @Override
                     public void onResponse(Call<Example> call, Response<Example> response) {
+
                         Example example = response.body();
 
                         mMoviesList = example.getResults();
@@ -143,6 +150,9 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
                     @Override
                     public void onFailure(Call<Example> call, Throwable t) {
+                        t.printStackTrace();
+                        Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
+                        toast.show();
                     }
                 });
 
@@ -155,8 +165,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         outState.putInt(SORT_TYPE, mSortPreference);
     }
 
-    //** View Holder Class
-    // View Holder Class
+    /** View Holder Class **/
 
     public class MovieViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
@@ -181,7 +190,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         }
     }
 
-    /** Movies Adapter Class */
+    /** Movies Adapter Class **/
 
     public class MoviesAdapter
             extends RecyclerView.Adapter<MoviesGridFragment.MovieViewHolder> {
@@ -189,7 +198,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         private List<Movie> mMovieList;
         private LayoutInflater mInflater;
         private Context mContext;
-        public static final String BASE_URL = "http://api.themoviedb.org/3/";
         public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
 
 
@@ -208,22 +216,13 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         @Override
         public void onBindViewHolder(MovieViewHolder holder, int position) {
 
-//            Float rating;
-
             Movie movie = mMovieList.get(position);
-
-            //Set the movie so the ViewHolder's onClickListener can create an intent to detail actiity
             holder.setMovie(movie);
 
             //Load image
             Picasso.with(mContext)
                     .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
                     .placeholder(R.color.colorAccent).into(holder.mImageView);
-
-
-            //Calculate movie's rating on a 5 star scale and set it to the star rating view on the card
-//            rating = movie.getPopularity() / 2 / 10;
-//            holder.mRatingBar.setRating(rating);
         }
 
         @Override

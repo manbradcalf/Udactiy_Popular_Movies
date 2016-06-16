@@ -32,6 +32,32 @@ public class MovieDetailActivity extends AppCompatActivity {
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
 
+    /* Creating final Target object here to pass to Picasso,
+     * in order to prevent the Target
+     * from being garbage collected.
+     * The seemingly random garbage collection
+     * of the Target was preventing
+     * the image from loading in theToolbar
+     * http://stackoverflow.com/questions/25975006/picasso-onbitmaploaded-never-called/36310327#36310327
+     * */
+    final Target mTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            mPoster.setImageBitmap(bitmap);
+            Log.e("App","Success to load poster in onBitmapLoaded method");
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            Log.d("onBitmapFailed", ": Bitmap failed!");
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
     public static Intent newIntent(Context packageContext, Movie movie) {
         Intent intent = new Intent(packageContext, MovieDetailActivity.class);
         intent.putExtra(EXTRA_MOVIE_ID, movie);
@@ -57,7 +83,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         String releaseDateText = "Released: " + movie.getReleaseDate();
         mReleaseDate.setText(releaseDateText);
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+
+        /* Setting Expanded Title Color to transparent here because having the title ellipsized
+        over the poster image looks hella ugly */
         mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+
         mCollapsingToolbarLayout.setTitle(movie.getTitle());
         mDescription.setText(description);
         mRatingBar.setRating(movie.getVoteAverage()/2);
@@ -66,28 +96,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-//      first answer here
-//      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso
+      /* first answer here
+      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
         Picasso.with(this)
                 .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-
-                        mPoster.setImageBitmap(bitmap);
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
-                        Log.d("onBitmapFailed",": Bitmap failed!");
-
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
-                });
+                .into(mTarget);
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
     }
