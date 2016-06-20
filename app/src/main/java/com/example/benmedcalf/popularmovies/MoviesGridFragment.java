@@ -2,7 +2,11 @@ package com.example.benmedcalf.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -53,7 +57,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         if (savedInstanceState != null) {
             mSortPreference = savedInstanceState.getInt(SORT_TYPE);
         }
-        callDB(mSortPreference);
     }
 
     @Override
@@ -75,6 +78,8 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         //Create Movies adapter and set it to the recyclerview
         mMoviesAdapter = new MoviesAdapter(getContext());
         mRecyclerView.setAdapter(mMoviesAdapter);
+
+        callDB(mSortPreference);
 
         return view;
 
@@ -112,51 +117,70 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
 
-        switch (sort_tag) {
-            case SORT_POPULARITY_TAG:
-                Call<Example> call_popular = service.getMostPopular("94a68d6f98f7825e429d10ff7af24af3");
-                call_popular.enqueue(new Callback<Example>() {
-                    @Override
-                    public void onResponse(Call<Example> call, Response<Example> response) {
-                        Example example = response.body();
+        if (isOnline(getContext())) {
+            switch (sort_tag) {
+                case SORT_POPULARITY_TAG:
+                    Call<Example> call_popular = service.getMostPopular(BuildConfig.MOVIES_TMDB_API_KEY);
+                    call_popular.enqueue(new Callback<Example>() {
+                        @Override
+                        public void onResponse(Call<Example> call, Response<Example> response) {
+                            Example example = response.body();
 
-                        mMoviesList = example.getResults();
-                        mMoviesAdapter.setMovieList(mMoviesList);
-                        mSortPreference = SORT_POPULARITY_TAG;
-                    }
+                            mMoviesList = example.getResults();
+                            mMoviesAdapter.setMovieList(mMoviesList);
+                            mSortPreference = SORT_POPULARITY_TAG;
+                        }
 
-                    @Override
-                    public void onFailure(Call<Example> call, Throwable t) {
-                        t.printStackTrace();
-                        Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
-                        toast.show();
+                        @Override
+                        public void onFailure(Call<Example> call, Throwable t) {
+                            t.printStackTrace();
+                            Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
+                            toast.show();
 
-                    }
-                });
-                break;
+                        }
+                    });
+                    break;
 
-            case SORT_TOP_RATED_TAG:
-                Call<Example> call_top_rated = service.getTopRated("94a68d6f98f7825e429d10ff7af24af3");
-                call_top_rated.enqueue(new Callback<Example>() {
-                    @Override
-                    public void onResponse(Call<Example> call, Response<Example> response) {
+                case SORT_TOP_RATED_TAG:
+                    Call<Example> call_top_rated = service.getTopRated(BuildConfig.MOVIES_TMDB_API_KEY);
+                    call_top_rated.enqueue(new Callback<Example>() {
+                        @Override
+                        public void onResponse(Call<Example> call, Response<Example> response) {
 
-                        Example example = response.body();
+                            Example example = response.body();
 
-                        mMoviesList = example.getResults();
-                        mMoviesAdapter.setMovieList(mMoviesList);
-                        mSortPreference = SORT_TOP_RATED_TAG;
-                    }
+                            mMoviesList = example.getResults();
+                            mMoviesAdapter.setMovieList(mMoviesList);
+                            mSortPreference = SORT_TOP_RATED_TAG;
+                        }
 
-                    @Override
-                    public void onFailure(Call<Example> call, Throwable t) {
-                        t.printStackTrace();
-                        Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                });
+                        @Override
+                        public void onFailure(Call<Example> call, Throwable t) {
+                            t.printStackTrace();
+                            Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                    });
 
+            }
+        } else {
+            Snackbar.make(mRecyclerView, "Unable to connect", Snackbar.LENGTH_LONG)
+                    .setActionTextColor(Color.RED)
+                    .setAction("Go To Settings", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+                        }
+                    })
+                    .show();
         }
+    }
+
+    private boolean isOnline(Context context) {
+        ConnectivityManager mngr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = mngr.getActiveNetworkInfo();
+
+        return !(info == null || (info.getState() != NetworkInfo.State.CONNECTED));
     }
 
     @Override
