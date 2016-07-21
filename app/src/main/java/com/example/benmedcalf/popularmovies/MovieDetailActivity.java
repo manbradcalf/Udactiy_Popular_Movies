@@ -68,7 +68,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.movie_detail_activity);
+        setContentView(R.layout.movie_detail_fragment);
         Intent intent = getIntent();
         Movie movie = intent.getParcelableExtra(EXTRA_MOVIE_ID);
         String description = movie.getOverview();

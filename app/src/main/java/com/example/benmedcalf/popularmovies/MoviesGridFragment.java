@@ -37,13 +37,15 @@ import retrofit2.Response;
 public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     private RecyclerView mRecyclerView;
-    private MoviesAdapter mMoviesAdapter;
+    public MoviesAdapter mMoviesAdapter;
     private List<Movie> mMoviesList;
     private Toolbar mToolbar;
     public static final int SORT_POPULARITY_TAG = 0;
     public static final int SORT_TOP_RATED_TAG = 1;
     private int mSortPreference;
     public static final String SORT_TYPE = "SORTTYPE";
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
 
 
     public MoviesGridFragment() {
@@ -209,9 +211,14 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = MovieDetailActivity.newIntent(getActivity(), mMovie);
-            startActivity(intent);
-        }
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(EXTRA_MOVIE_ID, mMovie);
+                MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
+
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_fragment_frame, movieDetailFragment,
+                               DETAILFRAGMENT_TAG).commit();
+            }
     }
 
     /** Movies Adapter Class **/
@@ -219,7 +226,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     public class MoviesAdapter
             extends RecyclerView.Adapter<MoviesGridFragment.MovieViewHolder> {
 
-        private List<Movie> mMovieList;
+        public List<Movie> mMovieList;
         private LayoutInflater mInflater;
         private Context mContext;
         public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
@@ -232,13 +239,13 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         }
 
         @Override
-        public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public MoviesGridFragment.MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mInflater.inflate(R.layout.movie_card, parent, false);
-            return new MovieViewHolder(view);
+            return new MoviesGridFragment.MovieViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(MovieViewHolder holder, int position) {
+        public void onBindViewHolder(MoviesGridFragment.MovieViewHolder holder, int position) {
 
             Movie movie = mMovieList.get(position);
             holder.setMovie(movie);
