@@ -106,8 +106,23 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     }
 
     public void onEvent(MovieSelectedEvent event) {
-        Intent intent = MovieDetailActivity.newIntent(getActivity(), event.getMovie());
-        startActivity(intent);
+        Bundle bundle = new Bundle();
+        Movie movie = event.getMovie();
+        bundle.putParcelable(EXTRA_MOVIE_ID, movie);
+        MovieDetailFragment detailFragment = new MovieDetailFragment();
+        detailFragment.setArguments(bundle);
+
+        if (MainActivity.mTwoPane) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_fragment_frame, new MovieDetailFragment(),
+                            DETAILFRAGMENT_TAG).commit();
+        } else {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_fragment, new MovieDetailFragment(),
+                            DETAILFRAGMENT_TAG).commit();
+        }
+//        Intent intent = MovieDetailActivity.newIntent(getActivity(), event.getMovie());
+//        startActivity(intent);
     }
 
 
