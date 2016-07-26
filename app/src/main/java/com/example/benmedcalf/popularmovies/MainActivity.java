@@ -1,12 +1,20 @@
 package com.example.benmedcalf.popularmovies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.example.benmedcalf.popularmovies.Event.MovieSelectedEvent;
+import com.example.benmedcalf.popularmovies.Model.Movie;
+
+import de.greenrobot.event.EventBus;
 
 public class MainActivity extends AppCompatActivity {
 
     public static boolean mTwoPane;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
+    public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
+    private EventBus mEventBus = EventBus.getDefault();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,19 +30,48 @@ public class MainActivity extends AppCompatActivity {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.movie_detail_fragment_frame, new MovieDetailFragment(),
-                                DETAILFRAGMENT_TAG).commit();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_fragment_frame, new MovieDetailFragment(),
+                            DETAILFRAGMENT_TAG).commit();
         } else {
             mTwoPane = false;
             getSupportFragmentManager().beginTransaction().add(
-                    R.id.container,new MoviesGridFragment())
+                    R.id.container, new MoviesGridFragment())
                     .commit();
         }
+    }
 
-//        MoviesGridFragment moviesGridFragment = ((MoviesGridFragment)getSupportFragmentManager()
-//        .findFragmentById(R.id.movie_detail_fragment));
+    @Override
+    public void onResume() {
+        super.onResume();
+        mEventBus.register(this);
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        mEventBus.unregister(this);
+    }
 
+    @SuppressWarnings("unused")
+    public void onEvent(MovieSelectedEvent event) {
+
+        Movie movie = event.getMovie();
+
+        if (MainActivity.mTwoPane) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_MOVIE_ID, movie);
+            MovieDetailFragment detailFragment = new MovieDetailFragment();
+            detailFragment.setArguments(bundle);
+
+            // Commit fragment
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_fragment_frame, detailFragment,
+                            EXTRA_MOVIE_ID).commit();
+        } else {
+            Intent intent = MovieDetailActivity.newIntent(this, movie);
+            startActivity(intent);
+        }
     }
 }
+

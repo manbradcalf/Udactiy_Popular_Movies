@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.benmedcalf.popularmovies.Adapter.MoviesAdapter;
-import com.example.benmedcalf.popularmovies.Event.MovieSelectedEvent;
 import com.example.benmedcalf.popularmovies.Model.Example;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 
@@ -46,6 +45,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     public static final String SORT_TYPE = "SORTTYPE";
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
+    private EventBus mEventBus = EventBus.getDefault();
 
 
     public MoviesGridFragment() {
@@ -87,47 +87,8 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
 
     @Override
-    public void onResume()
-    {
-        super.onResume();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        EventBus.getDefault().unregister(this);
-    }
-
-    public void onEvent(MovieSelectedEvent event) {
-        Bundle bundle = new Bundle();
-        Movie movie = event.getMovie();
-        bundle.putParcelable(EXTRA_MOVIE_ID, movie);
-        MovieDetailFragment detailFragment = new MovieDetailFragment();
-        detailFragment.setArguments(bundle);
-
-        if (MainActivity.mTwoPane) {
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_fragment_frame, new MovieDetailFragment(),
-                            DETAILFRAGMENT_TAG).commit();
-        } else {
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_fragment, new MovieDetailFragment(),
-                            DETAILFRAGMENT_TAG).commit();
-        }
-//        Intent intent = MovieDetailActivity.newIntent(getActivity(), event.getMovie());
-//        startActivity(intent);
-    }
-
-
-
-        @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.menu_movies_grid_fragment, menu);
     }

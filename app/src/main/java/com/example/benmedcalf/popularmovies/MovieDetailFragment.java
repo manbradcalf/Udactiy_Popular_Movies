@@ -44,7 +44,7 @@ public class MovieDetailFragment extends Fragment {
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             mPoster.setImageBitmap(bitmap);
-            Log.e("App","Success to load poster in onBitmapLoaded method");
+            Log.e("App", "Success to load poster in onBitmapLoaded method");
         }
 
         @Override
@@ -90,9 +90,19 @@ public class MovieDetailFragment extends Fragment {
 
             mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
 //            mDescription.setText(description);
-            mRatingBar.setRating(mMovie.getVoteAverage()/2);
+            mRatingBar.setRating(mMovie.getVoteAverage() / 2);
             rootView.setVisibility(View.VISIBLE);
+
+            /* first answer here
+      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
+            Picasso.with(getContext())
+                    .load(BASE_URL_FOR_IMAGES + mMovie.getPosterPath())
+                    .into(mTarget);
+
+            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
             return rootView;
+
+
         }
 
         return inflater.inflate(R.layout.empty_state, container, false);
