@@ -25,7 +25,6 @@ import com.example.benmedcalf.popularmovies.Model.Movie;
 
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,7 +44,6 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     public static final String SORT_TYPE = "SORTTYPE";
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
-    private EventBus mEventBus = EventBus.getDefault();
 
 
     public MoviesGridFragment() {

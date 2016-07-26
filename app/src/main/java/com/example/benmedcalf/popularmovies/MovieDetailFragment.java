@@ -79,8 +79,10 @@ public class MovieDetailFragment extends Fragment {
             mReleaseDate = (TextView) rootView.findViewById(R.id.release_date);
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
 
-            mTitle.setText(mMovie.getTitle());
             String releaseDateText = "Released: " + mMovie.getReleaseDate();
+            String description = mMovie.getOverview();
+
+            mTitle.setText(mMovie.getTitle());
             mReleaseDate.setText(releaseDateText);
             mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
 
@@ -89,7 +91,7 @@ public class MovieDetailFragment extends Fragment {
             mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
             mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
-//            mDescription.setText(description);
+            mDescription.setText(description);
             mRatingBar.setRating(mMovie.getVoteAverage() / 2);
             rootView.setVisibility(View.VISIBLE);
 
