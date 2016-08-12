@@ -66,10 +66,12 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         View view = inflater.inflate(R.layout.fragment_movie_grid, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.movies_recycler_view);
 
-        //Set up toolbar and make it a SupportActionBar to enable menu options
-        mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        mToolbar.setTitle("Popular Movies");
-        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        if (!MainActivity.mTwoPane) {
+            //Set up toolbar and make it a SupportActionBar to enable menu options
+            mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            mToolbar.setTitle("Popular Movies");
+            ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        }
 
         //Create gridlayoutmanager and set it to the recyclerview
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);

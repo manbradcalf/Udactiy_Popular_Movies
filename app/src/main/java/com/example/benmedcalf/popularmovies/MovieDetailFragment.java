@@ -84,31 +84,35 @@ public class MovieDetailFragment extends Fragment {
 
             mTitle.setText(mMovie.getTitle());
             mReleaseDate.setText(releaseDateText);
-            mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
+
+
+
+            if (!MainActivity.mTwoPane) {
+                mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
 
         /* Setting Expanded Title Color to transparent here because having the title ellipsized
         over the poster image looks hella ugly */
-            mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-
-            mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
-            mDescription.setText(description);
-            mRatingBar.setRating(mMovie.getVoteAverage() / 2);
-            rootView.setVisibility(View.VISIBLE);
+                mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+                mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
+            }
+                mDescription.setText(description);
+                mRatingBar.setRating(mMovie.getVoteAverage() / 2);
+                rootView.setVisibility(View.VISIBLE);
 
             /* first answer here
       http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
-            Picasso.with(getContext())
-                    .load(BASE_URL_FOR_IMAGES + mMovie.getPosterPath())
-                    .into(mTarget);
+                Picasso.with(getContext())
+                        .load(BASE_URL_FOR_IMAGES + mMovie.getPosterPath())
+                        .into(mTarget);
 
-            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
-            return rootView;
+                Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+                return rootView;
 
 
+            }
+
+            return inflater.inflate(R.layout.empty_state, container, false);
         }
 
-        return inflater.inflate(R.layout.empty_state, container, false);
+
     }
-
-
-}

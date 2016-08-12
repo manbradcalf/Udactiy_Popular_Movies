@@ -3,6 +3,7 @@ package com.example.benmedcalf.popularmovies;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.example.benmedcalf.popularmovies.Event.MovieSelectedEvent;
 import com.example.benmedcalf.popularmovies.Model.Movie;
@@ -15,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
     private EventBus mEventBus = EventBus.getDefault();
+    private Toolbar mTwoPaneToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +29,14 @@ public class MainActivity extends AppCompatActivity {
             // layouts (res/layout-sw600dp). If this view is present, then the activity
             // should be in two-pane mode
             mTwoPane = true;
+            mTwoPaneToolbar = (Toolbar) findViewById(R.id.two_pane_toolbar);
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.movie_detail_fragment_frame, new MovieDetailFragment(),
                             DETAILFRAGMENT_TAG).commit();
+            setSupportActionBar(mTwoPaneToolbar);
         } else {
             mTwoPane = false;
             getSupportFragmentManager().beginTransaction().add(
