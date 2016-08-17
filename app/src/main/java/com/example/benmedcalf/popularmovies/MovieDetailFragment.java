@@ -87,7 +87,7 @@ public class MovieDetailFragment extends Fragment {
 
 
 
-            if (!MainActivity.mTwoPane) {
+            if (MainActivity.getTwoPane()) {
                 mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
 
         /* Setting Expanded Title Color to transparent here because having the title ellipsized
