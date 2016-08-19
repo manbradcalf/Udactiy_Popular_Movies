@@ -5,13 +5,16 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.squareup.picasso.Picasso;
@@ -30,6 +33,7 @@ public class MovieDetailFragment extends Fragment {
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
+    public ToggleButton mToggleButton;
     private Movie mMovie;
 
     /* Creating final Target object here to pass to Picasso,
@@ -78,6 +82,18 @@ public class MovieDetailFragment extends Fragment {
             mPoster = (ImageView) rootView.findViewById(R.id.movie_poster_detail);
             mReleaseDate = (TextView) rootView.findViewById(R.id.release_date);
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
+            mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
+            mToggleButton.setChecked(false);
+            mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+            mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked)
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                    else
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                }
+            });
 
             String releaseDateText = "Released: " + mMovie.getReleaseDate();
             String description = mMovie.getOverview();
