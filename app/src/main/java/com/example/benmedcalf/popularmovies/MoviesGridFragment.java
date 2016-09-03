@@ -2,6 +2,8 @@ package com.example.benmedcalf.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -20,9 +22,12 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.benmedcalf.popularmovies.Adapter.MoviesAdapter;
+import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesContract;
+import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Example;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -42,12 +47,10 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     public static final int SORT_TOP_RATED_TAG = 1;
     private int mSortPreference;
     public static final String SORT_TYPE = "SORTTYPE";
-    private static final String DETAILFRAGMENT_TAG = "DFTAG";
-    public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
 
 
     public MoviesGridFragment() {
-
+        // Fragment constructors are empty
     }
 
     @Override
@@ -83,7 +86,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         mMoviesAdapter = new MoviesAdapter(getContext());
         mRecyclerView.setAdapter(mMoviesAdapter);
 
-        callDB(mSortPreference);
+        callMoviesAPI(mSortPreference);
 
         return view;
 
@@ -100,11 +103,15 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         switch (menuItem.getItemId()) {
 
             case R.id.sort_popularity:
-                callDB(SORT_POPULARITY_TAG);
+                callMoviesAPI(SORT_POPULARITY_TAG);
                 return true;
 
             case R.id.sort_rating:
-                callDB(SORT_TOP_RATED_TAG);
+                callMoviesAPI(SORT_TOP_RATED_TAG);
+                return true;
+
+            case R.id.sort_favorite:
+                callDB();
                 return true;
 
             default:
@@ -113,12 +120,12 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         return false;
     }
 
-    private void callDB(int sort_tag) {
+    private void callMoviesAPI(int sortTag) {
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
 
         if (isOnline(getContext())) {
-            switch (sort_tag) {
+            switch (sortTag) {
                 case SORT_POPULARITY_TAG:
                     Call<Example> call_popular = service.getMostPopular(BuildConfig.MOVIES_TMDB_API_KEY);
                     call_popular.enqueue(new Callback<Example>() {
@@ -174,6 +181,68 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
                     })
                     .show();
         }
+    }
+
+    private void callDB() {
+
+        List<Movie> moviesList = new ArrayList<>();
+
+        SQLiteDatabase db = new FavoriteMoviesDBHelper(getContext()).getWritableDatabase();
+        String[] projection = {
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_OVERVIEW,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POSTER_PATH,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_FAVORED
+        };
+
+        String sortOrder =
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE + " DESC";
+
+        Cursor c = db.query(
+                FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+
+        int movieIdColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID);
+        int titleColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE);
+        int releaseDateColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE);
+        int backdropPathColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH);
+        int overviewColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_OVERVIEW);
+        int popularityColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY);
+        int voteAverageColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE);
+        int posterPathColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POSTER_PATH);
+        int voteCountColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT);
+
+        while (c.moveToNext()) {
+            //The cursor is now set to the right position
+            Movie movie = new Movie();
+
+            movie.setId(c.getInt(movieIdColumn));
+            movie.setTitle(c.getString(titleColumn));
+            movie.setReleaseDate(c.getString(releaseDateColumn));
+            movie.setBackdropPath(c.getString(backdropPathColumn));
+            movie.setOverview(c.getString(overviewColumn));
+            movie.setPopularity(c.getFloat(popularityColumn));
+            movie.setVoteAverage(c.getFloat(voteAverageColumn));
+            movie.setPosterPath(c.getString(posterPathColumn));
+            movie.setVoteCount(c.getInt(voteCountColumn));
+
+            moviesList.add(movie);
+        }
+        c.close();
+        mMoviesList = moviesList;
+        mMoviesAdapter.setMovieList(mMoviesList);
     }
 
     private boolean isOnline(Context context) {

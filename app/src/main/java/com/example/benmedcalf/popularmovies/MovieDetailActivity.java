@@ -3,6 +3,8 @@ package com.example.benmedcalf.popularmovies;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -41,6 +43,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
     public ToggleButton mToggleButton;
     public FavoriteMoviesDBHelper mDBHelper;
+    private static final String SHARED_PREF = "SHARED_PREF";
 
     /* Creating final Target object here to pass to Picasso,
      * in order to prevent the Target
@@ -77,11 +80,16 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.movie_detail_fragment);
+
         Intent intent = getIntent();
         final Movie movie = intent.getParcelableExtra(EXTRA_MOVIE_ID);
         String description = movie.getOverview();
+        final String movieTitle = movie.getTitle();
+        final int movieId = movie.getId();
+
+        SharedPreferences sharedpreferences = getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+        final Editor editor = sharedpreferences.edit();
 
         mDescription = (TextView) findViewById(R.id.description);
         mTitle = (TextView) findViewById(R.id.movie_title);
@@ -92,29 +100,31 @@ public class MovieDetailActivity extends AppCompatActivity {
         String releaseDateText = "Released: " + movie.getReleaseDate();
         mReleaseDate.setText(releaseDateText);
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-
         mDBHelper = new FavoriteMoviesDBHelper(this);
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
-            if (!movie.isFavorite()) {
+            // 0 is default value returned if no movie matches movieTitle key
+            if (sharedpreferences.getInt(movieTitle, 0) == 0) {
                 mToggleButton.setChecked(false);
                 mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
             } else {
                 mToggleButton.setChecked(true);
                 mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                editor.putInt(movieTitle, movieId).apply();
             }
 
             mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        movie.setFavorite(true);
+                        editor.putInt(movieTitle, movieId).commit();
                         // Gets the data repository in write mode
                         SQLiteDatabase db = mDBHelper.getWritableDatabase();
 
                         // Create a new map of values, where column names are the keys
                         // TODO: make a method here that puts a whole movie into db
                         ContentValues values = new ContentValues();
+                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY, movie.getPopularity());
                         values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID, movie.getId());
                         values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
                         values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getReleaseDate());
@@ -124,18 +134,17 @@ public class MovieDetailActivity extends AppCompatActivity {
                         values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT, movie.getVoteCount());
                         values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH, movie.getBackdropPath());
                         values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_FAVORED, movie.isFavorite());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY, movie.getPopularity());
 
                         // Insert the new row, returning the primary key value of the new row
-                        long newRowId;
-                        newRowId = db.insert(
+                        db.insert(
                                 FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
                                 FavoriteMoviesContract.FavoritesEntry.COLUMN_NAME_NULLABLE,
                                 values);
-
-                    mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
                     } else {
+                        // TODO: Delete the favored movie if already favored
                         mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                        editor.remove(movieTitle);
                     }
                 }
             });

@@ -79,12 +79,6 @@
 
                     <ToggleButton
                         android:id="@+id/toggle_favorite"
-                        android:paddingBottom="16dp"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:paddingTop="32dp"
-                        android:layout_marginStart="32dp"
-                        android:layout_marginLeft="32dp"
                         android:textOff=""
                         android:textOn=""
                         android:textSize="0sp"

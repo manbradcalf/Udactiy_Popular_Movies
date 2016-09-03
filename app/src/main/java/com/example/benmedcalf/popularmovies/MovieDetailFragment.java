@@ -89,8 +89,10 @@ public class MovieDetailFragment extends Fragment {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked)
+                        // TODO: Add logic here that adds the movie to the SQLite db
                         mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
                     else
+                        // TODO: Add logic here that deletes the movie if it is already favored
                         mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
                 }
             });

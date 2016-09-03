@@ -71,7 +71,7 @@ public class Movie implements Parcelable {
     @Expose
     private Float voteAverage;
 
-    private boolean isFavorite = false;
+    private boolean isFavorite;
 
     @Override
     public int describeContents() {
