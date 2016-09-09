@@ -1,10 +1,12 @@
 package com.example.benmedcalf.popularmovies.Database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesContract.FavoritesEntry;
+import com.example.benmedcalf.popularmovies.Model.Movie;
 
 /**
  * Created by ben.medcalf on 8/18/16.
@@ -57,5 +59,34 @@ public class FavoriteMoviesDBHelper extends SQLiteOpenHelper {
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    public void addMovie(Movie movie) {
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY, movie.getPopularity());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID, movie.getId());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getReleaseDate());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_OVERVIEW, movie.getOverview());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE, movie.getVoteAverage());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POSTER_PATH, movie.getPosterPath());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT, movie.getVoteCount());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH, movie.getBackdropPath());
+        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_FAVORED, movie.isFavorite());
+
+        // Insert the new row, returning the primary key value of the new row
+        db.insert(
+                FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_NAME_NULLABLE,
+                values);
+    }
+
+    public void deleteMovie(int movieId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(FavoritesEntry.TABLE_NAME, FavoritesEntry.COLUMN_MOVIE_ID + " = " + movieId, null);
     }
 }

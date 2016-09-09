@@ -1,5 +1,7 @@
 package com.example.benmedcalf.popularmovies;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -35,6 +38,8 @@ public class MovieDetailFragment extends Fragment {
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
     public ToggleButton mToggleButton;
     private Movie mMovie;
+    private FavoriteMoviesDBHelper mDBHelper;
+    private static final String SHARED_PREF = "SHARED_PREF";
 
     /* Creating final Target object here to pass to Picasso,
  * in order to prevent the Target
@@ -72,6 +77,8 @@ public class MovieDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         Bundle arguments = getArguments();
+        final SharedPreferences sharedpreferences = getContext().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedpreferences.edit();
 
 
         if (arguments != null) {
@@ -82,37 +89,51 @@ public class MovieDetailFragment extends Fragment {
             mPoster = (ImageView) rootView.findViewById(R.id.movie_poster_detail);
             mReleaseDate = (TextView) rootView.findViewById(R.id.release_date);
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
+            mDBHelper = new FavoriteMoviesDBHelper(getContext());
             mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
-            mToggleButton.setChecked(false);
-            mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-            mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked)
-                        // TODO: Add logic here that adds the movie to the SQLite db
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-                    else
-                        // TODO: Add logic here that deletes the movie if it is already favored
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+            if (mToggleButton != null) {
+                // 0 is default value returned if no movie matches movieTitle key
+                if (sharedpreferences.getInt(mMovie.getTitle(), 0) == 0) {
+                    mToggleButton.setChecked(false);
+                    mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                } else {
+                    mToggleButton.setChecked(true);
+                    mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                    editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
                 }
-            });
+                mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                            if (!sharedpreferences.contains(mMovie.getTitle())) {
+                                // TODO: Add logic here that adds the movie to the SQLite db
+                                mDBHelper.addMovie(mMovie);
+                            }
+                        } else {
+                            // TODO: Add logic here that deletes the movie if it is already favored
+                            mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                            sharedpreferences.edit().remove(mMovie.getTitle());
+                            mDBHelper.deleteMovie(mMovie.getId());
+                        }
+                    }
+                });
 
-            String releaseDateText = "Released: " + mMovie.getReleaseDate();
-            String description = mMovie.getOverview();
+                String releaseDateText = "Released: " + mMovie.getReleaseDate();
+                String description = mMovie.getOverview();
 
-            mTitle.setText(mMovie.getTitle());
-            mReleaseDate.setText(releaseDateText);
+                mTitle.setText(mMovie.getTitle());
+                mReleaseDate.setText(releaseDateText);
 
 
-
-            if (MainActivity.getTwoPane()) {
-                mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
+                if (MainActivity.getTwoPane()) {
+                    mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
 
         /* Setting Expanded Title Color to transparent here because having the title ellipsized
         over the poster image looks hella ugly */
-                mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-                mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
-            }
+                    mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+                    mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
+                }
                 mDescription.setText(description);
                 mRatingBar.setRating(mMovie.getVoteAverage() / 2);
                 rootView.setVisibility(View.VISIBLE);
@@ -125,12 +146,8 @@ public class MovieDetailFragment extends Fragment {
 
                 Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
                 return rootView;
-
-
             }
 
             return inflater.inflate(R.layout.empty_state, container, false);
         }
-
-
     }

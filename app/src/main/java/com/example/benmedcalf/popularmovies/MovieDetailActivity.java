@@ -1,11 +1,9 @@
 package com.example.benmedcalf.popularmovies;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesContract;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.squareup.picasso.Picasso;
@@ -88,7 +85,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         final String movieTitle = movie.getTitle();
         final int movieId = movie.getId();
 
-        SharedPreferences sharedpreferences = getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+        final SharedPreferences sharedpreferences = getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
         final Editor editor = sharedpreferences.edit();
 
         mDescription = (TextView) findViewById(R.id.description);
@@ -114,61 +111,46 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
 
             mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        editor.putInt(movieTitle, movieId).commit();
-                        // Gets the data repository in write mode
-                        SQLiteDatabase db = mDBHelper.getWritableDatabase();
+                                                         @Override
+                                                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                                             if (isChecked) {
+                                                                 mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
 
-                        // Create a new map of values, where column names are the keys
-                        // TODO: make a method here that puts a whole movie into db
-                        ContentValues values = new ContentValues();
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY, movie.getPopularity());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID, movie.getId());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getReleaseDate());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_OVERVIEW, movie.getOverview());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE, movie.getVoteAverage());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POSTER_PATH, movie.getPosterPath());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT, movie.getVoteCount());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH, movie.getBackdropPath());
-                        values.put(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_FAVORED, movie.isFavorite());
-
-                        // Insert the new row, returning the primary key value of the new row
-                        db.insert(
-                                FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
-                                FavoriteMoviesContract.FavoritesEntry.COLUMN_NAME_NULLABLE,
-                                values);
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-                    } else {
-                        // TODO: Delete the favored movie if already favored
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                        editor.remove(movieTitle);
-                    }
-                }
-            });
-        }
-
+                                                                 if (!sharedpreferences.contains(movieTitle)) {
+                                                                     editor.putInt(movieTitle, movieId).commit();
+                                                                     mDBHelper.addMovie(movie);
+                                                                 }
+                                                             } else {
+                                                                     // TODO: Delete the favored movie if already favored
+                                                                     if (sharedpreferences.contains(movieTitle)) {
+                                                                         sharedpreferences.edit().remove(movieTitle).apply();
+                                                                         mDBHelper.deleteMovie(movieId);
+                                                                     }
+                                                                     mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                                                                     editor.remove(movieTitle);
+                                                                 }
+                                                             }
+                                                     });
         /* Setting Expanded Title Color to transparent here because having the title ellipsized
         over the poster image looks hella ugly */
-        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+                    mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
-        mCollapsingToolbarLayout.setTitle(movie.getTitle());
-        mDescription.setText(description);
-        mRatingBar.setRating(movie.getVoteAverage() / 2);
+            mCollapsingToolbarLayout.setTitle(movie.getTitle());
+            mDescription.setText(description);
+            mRatingBar.setRating(movie.getVoteAverage() / 2);
 
-        setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
       /* first answer here
       http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
-        Picasso.with(this)
-                .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .into(mTarget);
+            Picasso.with(this)
+                    .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
+                    .into(mTarget);
 
-        Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+        }
     }
 
     @Override
