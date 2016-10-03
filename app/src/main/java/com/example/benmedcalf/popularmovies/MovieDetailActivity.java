@@ -21,8 +21,16 @@ import android.widget.ToggleButton;
 
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
+import com.example.benmedcalf.popularmovies.Model.Result;
+import com.example.benmedcalf.popularmovies.Model.Video;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -35,6 +43,11 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
+    public TextView mVideoId;
+    public TextView mVideoKey;
+    public TextView mVideoName;
+    public TextView mVideoSite;
+    public TextView mVideoSize;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -98,6 +111,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         mReleaseDate.setText(releaseDateText);
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         mDBHelper = new FavoriteMoviesDBHelper(this);
+
+        // Trailer shiz
+        mVideoId = (TextView) findViewById(R.id.video_id);
+        mVideoName = (TextView) findViewById(R.id.video_name);
+        mVideoSize = (TextView) findViewById(R.id.video_size);
+        mVideoKey = (TextView) findViewById(R.id.video_key);
+        mVideoSite = (TextView) findViewById(R.id.video_site);
+
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
             // 0 is default value returned if no movie matches movieTitle key
@@ -138,6 +159,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             mCollapsingToolbarLayout.setTitle(movie.getTitle());
             mDescription.setText(description);
             mRatingBar.setRating(movie.getVoteAverage() / 2);
+            getMovieTrailer(movie);
 
             setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -162,4 +184,31 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void getMovieTrailer(Movie movie) {
+        MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
+
+        Call<Video> call_video_result = service.getVideo(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
+        call_video_result.enqueue(new Callback<Video>() {
+            @Override
+            public void onResponse(Call<Video> call, Response<Video> response) {
+                Video video = response.body();
+                List<Result> results = response.body().getResults();
+
+                mVideoId.setText(video.getId());
+                mVideoKey.setText(results.get());
+                mVideoName.setText(result.getName());
+                mVideoSite.setText(result.getSite());
+                mVideoSize.setText(result.getSize().toString());
+
+
+            }
+
+            @Override
+            public void onFailure(Call<Video> call, Throwable t) {
+
+            }
+        });
+    }
+
 }

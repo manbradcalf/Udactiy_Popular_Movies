@@ -49,16 +49,16 @@ public class MovieDetailFragment extends Fragment {
  * the image from loading in theToolbar
  * http://stackoverflow.com/questions/25975006/picasso-onbitmaploaded-never-called/36310327#36310327
  * */
-    final Target mTarget = new Target() {
+    final Target Target = new Target() {
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             mPoster.setImageBitmap(bitmap);
-            Log.e("App", "Success to load poster in onBitmapLoaded method");
+            Log.d("App", "Success to load poster in onBitmapLoaded method");
         }
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-            Log.d("onBitmapFailed", ": Bitmap failed!");
+            Log.e("onBitmapFailed", ": Bitmap failed!");
         }
 
         @Override
@@ -83,12 +83,35 @@ public class MovieDetailFragment extends Fragment {
 
         if (arguments != null) {
             View rootView = inflater.inflate(R.layout.movie_detail_fragment, container, false);
+            //Get the movie
             mMovie = arguments.getParcelable(EXTRA_MOVIE_ID);
+
+            //Get and set description
             mDescription = (TextView) rootView.findViewById(R.id.description);
+            String description = mMovie.getOverview();
+            mDescription.setText(description);
+
+            //Get and set Title
             mTitle = (TextView) rootView.findViewById(R.id.movie_title);
+            mTitle.setText(mMovie.getTitle());
+
+            /* Get and set poster.
+            / first answer here
+            / http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
             mPoster = (ImageView) rootView.findViewById(R.id.movie_poster_detail);
+            Picasso.with(getContext())
+                    .load(BASE_URL_FOR_IMAGES + mMovie.getPosterPath())
+                    .into(Target);
+
+            //Get and set Release Date
             mReleaseDate = (TextView) rootView.findViewById(R.id.release_date);
+            String releaseDateText = "Released: " + mMovie.getReleaseDate();
+            mReleaseDate.setText(releaseDateText);
+
+            //Get and set rating
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
+            mRatingBar.setRating(mMovie.getVoteAverage() / 2);
+
             mDBHelper = new FavoriteMoviesDBHelper(getContext());
             mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
             if (mToggleButton != null) {
@@ -107,47 +130,34 @@ public class MovieDetailFragment extends Fragment {
                         if (isChecked) {
                             mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
                             if (!sharedpreferences.contains(mMovie.getTitle())) {
-                                // TODO: Add logic here that adds the movie to the SQLite db
                                 mDBHelper.addMovie(mMovie);
                             }
                         } else {
-                            // TODO: Add logic here that deletes the movie if it is already favored
                             mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                            sharedpreferences.edit().remove(mMovie.getTitle());
+                            sharedpreferences.edit().remove(mMovie.getTitle()).apply();
                             mDBHelper.deleteMovie(mMovie.getId());
                         }
                     }
+
                 });
 
-                String releaseDateText = "Released: " + mMovie.getReleaseDate();
-                String description = mMovie.getOverview();
-
-                mTitle.setText(mMovie.getTitle());
-                mReleaseDate.setText(releaseDateText);
-
-
-                if (MainActivity.getTwoPane()) {
-                    mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
-
-        /* Setting Expanded Title Color to transparent here because having the title ellipsized
-        over the poster image looks hella ugly */
-                    mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-                    mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
-                }
-                mDescription.setText(description);
-                mRatingBar.setRating(mMovie.getVoteAverage() / 2);
-                rootView.setVisibility(View.VISIBLE);
-
-            /* first answer here
-      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
-                Picasso.with(getContext())
-                        .load(BASE_URL_FOR_IMAGES + mMovie.getPosterPath())
-                        .into(mTarget);
-
-                Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
-                return rootView;
             }
 
-            return inflater.inflate(R.layout.empty_state, container, false);
+
+            if (MainActivity.getTwoPane()) {
+                mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
+                //Setting Expanded Title Color to transparent here because having the title ellipsized
+                //over the poster image looks hella ugly */
+                mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+                mCollapsingToolbarLayout.setTitle(mMovie.getTitle());
+            }
+
+            rootView.setVisibility(View.VISIBLE);
+
+            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+            return rootView;
         }
+
+        return inflater.inflate(R.layout.empty_state, container, false);
     }
+}

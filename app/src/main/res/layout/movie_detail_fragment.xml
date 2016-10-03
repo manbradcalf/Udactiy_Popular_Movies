@@ -81,11 +81,9 @@
                         android:id="@+id/toggle_favorite"
                         android:textOff=""
                         android:textOn=""
-                        android:textSize="0sp"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
-                        android:layout_gravity="end"
-                        android:fitsSystemWindows="true"
+                        android:layout_gravity="right"
                         android:background="@drawable/favorite_toggle"/>
 
                 </LinearLayout>
@@ -114,6 +112,31 @@
                     android:padding="16dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/video_id"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/video_key"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/video_name"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/video_site"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/video_size"/>
 
             </LinearLayout>
 
