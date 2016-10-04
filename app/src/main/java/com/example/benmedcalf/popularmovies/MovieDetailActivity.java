@@ -194,14 +194,14 @@ public class MovieDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Video> call, Response<Video> response) {
                 Video video = response.body();
                 List<Result> results = response.body().getResults();
+               //TODO: Find a way to get back all results in the list without a for loop
+                Result result = results.get(0);
 
-                mVideoId.setText(video.getId());
-                mVideoKey.setText(results.get());
+                mVideoId.setText(result.getId());
+                mVideoKey.setText(result.getKey());
                 mVideoName.setText(result.getName());
                 mVideoSite.setText(result.getSite());
                 mVideoSize.setText(result.getSize().toString());
-
-
             }
 
             @Override
