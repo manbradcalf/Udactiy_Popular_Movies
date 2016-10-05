@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -24,6 +25,7 @@ import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.example.benmedcalf.popularmovies.Model.Result;
 import com.example.benmedcalf.popularmovies.Model.Video;
 import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubeIntents;
 import com.google.android.youtube.player.YouTubeThumbnailLoader;
 import com.google.android.youtube.player.YouTubeThumbnailView;
 import com.squareup.picasso.Picasso;
@@ -43,7 +45,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
     public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w342/";
-    String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
@@ -53,7 +54,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
     public ToggleButton mToggleButton;
     public FavoriteMoviesDBHelper mDBHelper;
+
     private static final String SHARED_PREF = "SHARED_PREF";
+
 
     /* Creating final Target object here to pass to Picasso,
      * in order to prevent the Target
@@ -128,30 +131,29 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
 
             mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                                                         @Override
-                                                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                                             if (isChecked) {
-                                                                 mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
 
-                                                                 if (!sharedpreferences.contains(movieTitle)) {
-                                                                     editor.putInt(movieTitle, movieId).commit();
-                                                                     mDBHelper.addMovie(movie);
-                                                                 }
-                                                             } else {
-                                                                     // TODO: Delete the favored movie if already favored
-                                                                     if (sharedpreferences.contains(movieTitle)) {
-                                                                         sharedpreferences.edit().remove(movieTitle).apply();
-                                                                         mDBHelper.deleteMovie(movieId);
-                                                                     }
-                                                                     mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                                                                     editor.remove(movieTitle);
-                                                                 }
-                                                             }
-                                                     });
+                        if (!sharedpreferences.contains(movieTitle)) {
+                            editor.putInt(movieTitle, movieId).commit();
+                            mDBHelper.addMovie(movie);
+                        }
+                    } else {
+                        // TODO: Delete the favored movie if already favored
+                        if (sharedpreferences.contains(movieTitle)) {
+                            sharedpreferences.edit().remove(movieTitle).apply();
+                            mDBHelper.deleteMovie(movieId);
+                        }
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                        editor.remove(movieTitle);
+                    }
+                }
+            });
         /* Setting Expanded Title Color to transparent here because having the title ellipsized
         over the poster image looks hella ugly */
-                    mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-
+            mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
             mCollapsingToolbarLayout.setTitle(movie.getTitle());
             mDescription.setText(description);
             mRatingBar.setRating(movie.getVoteAverage() / 2);
@@ -182,31 +184,34 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     private void getMovieTrailer(Movie movie) {
+
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
-
-        Call<Video> call_video_result = service.getVideo(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
-        call_video_result.enqueue(new Callback<Video>() {
+        Call<Video> call = service.getVideo(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
+        call.enqueue(new Callback<Video>() {
             @Override
-            public void onResponse(Call<Video> call, Response<Video> response) {
-                Video video = response.body();
-                List<Result> results = response.body().getResults();
-                Result result = results.get(0);
+            public void onResponse(Call<Video> call, final Response<Video> response) {
 
-                final String videoURL = YOUTUBE_BASE_URL + result.getKey();
+                List<Result> results = response.body().getResults();
+                final Result result = results.get(0);
 
                 mVideoTrailer.initialize("AIzaSyBpZu7TdfrT8DS9sCtihH2Y7Nozl1wWRyk", new YouTubeThumbnailView.OnInitializedListener() {
                     @Override
                     public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader youTubeThumbnailLoader) {
-                        youTubeThumbnailLoader.setVideo(videoURL);
+
+                        youTubeThumbnailLoader.setVideo(result.getKey());
+                        mVideoTrailer.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = YouTubeIntents.createPlayVideoIntent(MovieDetailActivity.this, result.getKey());
+                                startActivity(intent);
+                            }
+                        });
                     }
 
                     @Override
                     public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
-
                     }
                 });
-
-
             }
 
             @Override
