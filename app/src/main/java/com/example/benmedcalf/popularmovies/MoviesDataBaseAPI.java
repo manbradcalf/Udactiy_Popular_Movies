@@ -16,7 +16,6 @@ import retrofit2.http.Query;
 public interface MoviesDataBaseAPI {
 
     String BASE_URL = "http://api.themoviedb.org/3/";
-    String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
     //Returns JSON for top rated movies
     @GET("movie/top_rated")

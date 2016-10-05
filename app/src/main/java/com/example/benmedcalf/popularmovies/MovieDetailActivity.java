@@ -23,6 +23,9 @@ import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.example.benmedcalf.popularmovies.Model.Result;
 import com.example.benmedcalf.popularmovies.Model.Video;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubeThumbnailLoader;
+import com.google.android.youtube.player.YouTubeThumbnailView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -40,14 +43,11 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE_ID = "com.example.benmedcalf.popularmovies.movie_id";
     public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w342/";
+    String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
-    public TextView mVideoId;
-    public TextView mVideoKey;
-    public TextView mVideoName;
-    public TextView mVideoSite;
-    public TextView mVideoSize;
+    public YouTubeThumbnailView mVideoTrailer;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -113,11 +113,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mDBHelper = new FavoriteMoviesDBHelper(this);
 
         // Trailer shiz
-        mVideoId = (TextView) findViewById(R.id.video_id);
-        mVideoName = (TextView) findViewById(R.id.video_name);
-        mVideoSize = (TextView) findViewById(R.id.video_size);
-        mVideoKey = (TextView) findViewById(R.id.video_key);
-        mVideoSite = (TextView) findViewById(R.id.video_site);
+        mVideoTrailer = (YouTubeThumbnailView) findViewById(R.id.video_trailer_thumbnail);
 
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
@@ -194,12 +190,21 @@ public class MovieDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Video> call, Response<Video> response) {
                 Video video = response.body();
                 List<Result> results = response.body().getResults();
+                Result result = results.get(0);
 
-                mVideoId.setText(video.getId());
-                mVideoKey.setText(results.get());
-                mVideoName.setText(result.getName());
-                mVideoSite.setText(result.getSite());
-                mVideoSize.setText(result.getSize().toString());
+                final String videoURL = YOUTUBE_BASE_URL + result.getKey();
+
+                mVideoTrailer.initialize("AIzaSyBpZu7TdfrT8DS9sCtihH2Y7Nozl1wWRyk", new YouTubeThumbnailView.OnInitializedListener() {
+                    @Override
+                    public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader youTubeThumbnailLoader) {
+                        youTubeThumbnailLoader.setVideo(videoURL);
+                    }
+
+                    @Override
+                    public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
+
+                    }
+                });
 
 
             }
