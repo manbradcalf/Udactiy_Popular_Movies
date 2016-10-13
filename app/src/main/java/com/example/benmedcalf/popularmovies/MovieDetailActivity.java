@@ -14,8 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -45,7 +45,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
-    public GridView mTrailerGridView;
+    public ListView mTrailerGridView;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -113,7 +113,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mDBHelper = new FavoriteMoviesDBHelper(this);
 
         // Trailer shiz
-        mTrailerGridView = (GridView) findViewById(R.id.trailers_grid);
+        mTrailerGridView = (ListView) findViewById(R.id.trailers_grid);
 
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
