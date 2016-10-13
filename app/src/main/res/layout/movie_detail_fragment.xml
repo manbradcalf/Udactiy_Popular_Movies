@@ -121,16 +121,16 @@
                     android:text="@string/trailer"
                     android:layout_gravity="center"/>
 
-                <com.google.android.youtube.player.YouTubeThumbnailView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:paddingBottom="32dp"
-                    android:id="@+id/video_trailer_thumbnail"/>
+                <include layout="@layout/grid_trailers"
+                    android:layout_width="240dp"
+                    android:layout_height="240dp"
+                    android:layout_gravity="center"/>
 
             </LinearLayout>
 
+
         </android.support.v7.widget.CardView>
+
 
 
     </android.support.v4.widget.NestedScrollView>

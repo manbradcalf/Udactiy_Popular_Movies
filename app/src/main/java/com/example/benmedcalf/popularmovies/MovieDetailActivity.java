@@ -13,21 +13,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.example.benmedcalf.popularmovies.Adapter.ThumbnailTrailerAdapter;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 import com.example.benmedcalf.popularmovies.Model.Result;
 import com.example.benmedcalf.popularmovies.Model.Video;
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubeIntents;
-import com.google.android.youtube.player.YouTubeThumbnailLoader;
-import com.google.android.youtube.player.YouTubeThumbnailView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -48,7 +45,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
-    public YouTubeThumbnailView mVideoTrailer;
+    public GridView mTrailerGridView;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -116,7 +113,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mDBHelper = new FavoriteMoviesDBHelper(this);
 
         // Trailer shiz
-        mVideoTrailer = (YouTubeThumbnailView) findViewById(R.id.video_trailer_thumbnail);
+        mTrailerGridView = (GridView) findViewById(R.id.trailers_grid);
 
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
@@ -192,26 +189,8 @@ public class MovieDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Video> call, final Response<Video> response) {
 
                 List<Result> results = response.body().getResults();
-                final Result result = results.get(0);
-
-                mVideoTrailer.initialize("AIzaSyBpZu7TdfrT8DS9sCtihH2Y7Nozl1wWRyk", new YouTubeThumbnailView.OnInitializedListener() {
-                    @Override
-                    public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader youTubeThumbnailLoader) {
-
-                        youTubeThumbnailLoader.setVideo(result.getKey());
-                        mVideoTrailer.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = YouTubeIntents.createPlayVideoIntent(MovieDetailActivity.this, result.getKey());
-                                startActivity(intent);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
-                    }
-                });
+                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(MovieDetailActivity.this, results);
+                mTrailerGridView.setAdapter(adapter);
             }
 
             @Override
