@@ -1,6 +1,9 @@
 package com.example.benmedcalf.popularmovies.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.media.Image;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,73 +12,75 @@ import android.widget.ImageView;
 
 import com.example.benmedcalf.popularmovies.Model.Result;
 import com.example.benmedcalf.popularmovies.R;
+import com.google.android.youtube.player.YouTubeIntents;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ben.medcalf on 10/6/16.
  */
 
-public class ThumbnailTrailerAdapter extends BaseAdapter {
+public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrailerAdapter.TrailerHolder>{
 
-    private final Context mContext;
-    private final LayoutInflater mInflater;
-    private List<Result> mList;
+    private List<Result> mTrailerResultsList;
+    private LayoutInflater mInflater;
+    private Context mContext;
+    public static final String BASE_URL_YOUTUBE_THUMB = "http://img.youtube.com/vi/";
+    public static final String THUMB_SIZE_SUFFIX = "/0.jpg";
 
     public ThumbnailTrailerAdapter(Context context, List<Result> results) {
-        mContext = context;
-        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mList = results;
-    }
+        this.mContext = context;
+        this.mInflater = LayoutInflater.from(context);
+        this.mTrailerResultsList = results;
 
-
-    @Override
-    public int getCount() {
-        return mList.size();
     }
 
     @Override
-    public Result getItem(int position) {
-        return mList.get(position);
+    public TrailerHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        ImageView imageView = (ImageView) mInflater.inflate(R.layout.item_trailers, parent, false);
+        return new TrailerHolder(imageView);
+
     }
 
     @Override
-    public long getItemId(int position) {
-        return position;
-    }
+    public void onBindViewHolder(TrailerHolder holder, int position) {
 
-    public Context getContext() {
-        return mContext;
+        final Result result = mTrailerResultsList.get(position);
+        holder.setResult(result);
+
+        Picasso.with(mContext)
+                .load(BASE_URL_YOUTUBE_THUMB + result.getKey() + THUMB_SIZE_SUFFIX)
+                .placeholder(R.drawable.ic_thumb_background)
+                .into(holder.mImageView);
+
+        holder.mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = YouTubeIntents.createPlayVideoIntent(mContext, result.getKey());
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        ViewHolder viewHolder;
-
-        if (view == null) {
-            view = mInflater.inflate(R.layout.item_trailers, parent, false);
-            viewHolder = new ViewHolder(view);
-            view.setTag(viewHolder);
-        }
-
-        final Result result = getItem(position);
-
-        viewHolder = (ViewHolder) view.getTag();
-
-        String thumbnail_URL = "http://img.youtube.com/vi/" + result.getKey() + "/0.jpg";
-        Picasso.with(getContext()).load(thumbnail_URL).into(viewHolder.imageView);
-
-        return view;
+    public int getItemCount() {
+        return (mTrailerResultsList == null) ? 0 : mTrailerResultsList.size();
     }
 
-    private static class ViewHolder {
-        final ImageView imageView;
+    public class TrailerHolder extends RecyclerView.ViewHolder {
+        public ImageView mImageView;
+        public Result mResult;
 
-        ViewHolder(View view) {
-            imageView = (ImageView) view.findViewById(R.id.trailer_grid_item);
+        public void setResult(Result result) {mResult = result;}
+
+        public TrailerHolder(ImageView itemview) {
+            super(itemview);
+            mImageView = (ImageView) itemview.findViewById(R.id.trailer_grid_item);
+
         }
 
     }
+
 }
