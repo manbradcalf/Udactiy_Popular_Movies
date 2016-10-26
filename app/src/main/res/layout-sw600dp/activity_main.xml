@@ -22,11 +22,11 @@
         android:baselineAligned="false"
         android:divider="?android:attr/dividerHorizontal"
         android:orientation="horizontal"
-        tools:context="com.example.benmedcalf.popularmovies.MainActivity">
+        tools:context="com.movieResult.benmedcalf.popularmovies.MainActivity">
 
         <fragment
             android:id="@+id/fragment_movie_grid"
-            android:name="com.example.benmedcalf.popularmovies.MoviesGridFragment"
+            android:name="com.movieResult.benmedcalf.popularmovies.MoviesGridFragment"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"

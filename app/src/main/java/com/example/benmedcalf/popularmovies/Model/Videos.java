@@ -12,14 +12,14 @@ import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("org.jsonschema2pojo")
-public class Video implements Parcelable {
+public class Videos implements Parcelable {
 
     @SerializedName("id")
     @Expose
     private Integer id;
     @SerializedName("results")
     @Expose
-    private List<Result> results = new ArrayList<Result>();
+    private List<VideoResult> results = new ArrayList<VideoResult>();
 
     /**
      * @return The id
@@ -38,14 +38,14 @@ public class Video implements Parcelable {
     /**
      * @return The results
      */
-    public List<Result> getResults() {
+    public List<VideoResult> getResults() {
         return results;
     }
 
     /**
      * @param results The results
      */
-    public void setResults(List<Result> results) {
+    public void setResults(List<VideoResult> results) {
         this.results = results;
     }
 
@@ -60,23 +60,23 @@ public class Video implements Parcelable {
         dest.writeTypedList(this.results);
     }
 
-    public Video() {
+    public Videos() {
     }
 
-    protected Video(Parcel in) {
+    protected Videos(Parcel in) {
         this.id = (Integer) in.readValue(Integer.class.getClassLoader());
-        this.results = in.createTypedArrayList(Result.CREATOR);
+        this.results = in.createTypedArrayList(VideoResult.CREATOR);
     }
 
-    public static final Parcelable.Creator<Video> CREATOR = new Parcelable.Creator<Video>() {
+    public static final Parcelable.Creator<Videos> CREATOR = new Parcelable.Creator<Videos>() {
         @Override
-        public Video createFromParcel(Parcel source) {
-            return new Video(source);
+        public Videos createFromParcel(Parcel source) {
+            return new Videos(source);
         }
 
         @Override
-        public Video[] newArray(int size) {
-            return new Video[size];
+        public Videos[] newArray(int size) {
+            return new Videos[size];
         }
     };
 }

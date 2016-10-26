@@ -17,16 +17,18 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.example.benmedcalf.popularmovies.Adapter.ReviewsAdapter;
 import com.example.benmedcalf.popularmovies.Adapter.ThumbnailTrailerAdapter;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
-import com.example.benmedcalf.popularmovies.Model.Result;
-import com.example.benmedcalf.popularmovies.Model.Video;
+import com.example.benmedcalf.popularmovies.Model.ReviewResult;
+import com.example.benmedcalf.popularmovies.Model.Reviews;
+import com.example.benmedcalf.popularmovies.Model.VideoResult;
+import com.example.benmedcalf.popularmovies.Model.Videos;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -47,7 +49,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
-    public RecyclerView mTrailerGridView;
+    public RecyclerView mTrailerRecyclerView;
+    public RecyclerView mReviewRecyclerView;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -115,9 +118,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         mDBHelper = new FavoriteMoviesDBHelper(this);
 
         // Trailer shiz
-        mTrailerGridView = (RecyclerView) findViewById(R.id.trailers_grid);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        mTrailerGridView.setLayoutManager(layoutManager);
+        mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailers_grid);
+        RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getApplicationContext());
+        mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
+
+        // Review shiz
+        mReviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
+        RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getApplicationContext());
+        mReviewRecyclerView.setLayoutManager(layoutManagerReviews);
 
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
@@ -159,6 +167,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             mDescription.setText(description);
             mRatingBar.setRating(movie.getVoteAverage() / 2);
             getMovieTrailer(movie);
+            getMovieReviews(movie);
 
             setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -187,18 +196,37 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void getMovieTrailer(Movie movie) {
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
-        Call<Video> call = service.getVideo(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
-        call.enqueue(new Callback<Video>() {
+        Call<Videos> call = service.getVideo(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
+        call.enqueue(new Callback<Videos>() {
             @Override
-            public void onResponse(Call<Video> call, final Response<Video> response) {
+            public void onResponse(Call<Videos> call, final Response<Videos> response) {
 
-                List<Result> results = response.body().getResults();
-                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(MovieDetailActivity.this, results);
-                mTrailerGridView.setAdapter(adapter);
+                List<VideoResult> videoResults = response.body().getResults();
+                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(MovieDetailActivity.this, videoResults);
+                mTrailerRecyclerView.setAdapter(adapter);
             }
 
             @Override
-            public void onFailure(Call<Video> call, Throwable t) {
+            public void onFailure(Call<Videos> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getMovieReviews(Movie movie) {
+
+        MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
+        Call<Reviews> call = service.getReviews(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
+        call.enqueue(new Callback<Reviews>() {
+            @Override
+            public void onResponse(Call<Reviews> call, Response<Reviews> response) {
+                List<ReviewResult> reviewResults = response.body().getResults();
+                ReviewsAdapter adapter = new ReviewsAdapter(MovieDetailActivity.this, reviewResults);
+                mReviewRecyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(Call<Reviews> call, Throwable t) {
 
             }
         });

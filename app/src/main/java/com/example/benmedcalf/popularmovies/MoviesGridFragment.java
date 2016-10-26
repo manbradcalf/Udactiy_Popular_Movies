@@ -24,7 +24,7 @@ import android.widget.Toast;
 import com.example.benmedcalf.popularmovies.Adapter.MoviesAdapter;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesContract;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
-import com.example.benmedcalf.popularmovies.Model.Example;
+import com.example.benmedcalf.popularmovies.Model.MovieResult;
 import com.example.benmedcalf.popularmovies.Model.Movie;
 
 import java.util.ArrayList;
@@ -127,19 +127,19 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         if (isOnline(getContext())) {
             switch (sortTag) {
                 case SORT_POPULARITY_TAG:
-                    Call<Example> call_popular = service.getMostPopular(BuildConfig.MOVIES_TMDB_API_KEY);
-                    call_popular.enqueue(new Callback<Example>() {
+                    Call<MovieResult> call_popular = service.getMostPopular(BuildConfig.MOVIES_TMDB_API_KEY);
+                    call_popular.enqueue(new Callback<MovieResult>() {
                         @Override
-                        public void onResponse(Call<Example> call, Response<Example> response) {
-                            Example example = response.body();
+                        public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
+                            MovieResult movieResult = response.body();
 
-                            mMoviesList = example.getResults();
+                            mMoviesList = movieResult.getResults();
                             mMoviesAdapter.setMovieList(mMoviesList);
                             mSortPreference = SORT_POPULARITY_TAG;
                         }
 
                         @Override
-                        public void onFailure(Call<Example> call, Throwable t) {
+                        public void onFailure(Call<MovieResult> call, Throwable t) {
                             t.printStackTrace();
                             Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
                             toast.show();
@@ -149,20 +149,20 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
                     break;
 
                 case SORT_TOP_RATED_TAG:
-                    Call<Example> call_top_rated = service.getTopRated(BuildConfig.MOVIES_TMDB_API_KEY);
-                    call_top_rated.enqueue(new Callback<Example>() {
+                    Call<MovieResult> call_top_rated = service.getTopRated(BuildConfig.MOVIES_TMDB_API_KEY);
+                    call_top_rated.enqueue(new Callback<MovieResult>() {
                         @Override
-                        public void onResponse(Call<Example> call, Response<Example> response) {
+                        public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
 
-                            Example example = response.body();
+                            MovieResult movieResult = response.body();
 
-                            mMoviesList = example.getResults();
+                            mMoviesList = movieResult.getResults();
                             mMoviesAdapter.setMovieList(mMoviesList);
                             mSortPreference = SORT_TOP_RATED_TAG;
                         }
 
                         @Override
-                        public void onFailure(Call<Example> call, Throwable t) {
+                        public void onFailure(Call<MovieResult> call, Throwable t) {
                             t.printStackTrace();
                             Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
                             toast.show();

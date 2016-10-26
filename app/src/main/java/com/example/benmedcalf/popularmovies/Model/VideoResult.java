@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import javax.annotation.Generated;
 
 @Generated("org.jsonschema2pojo")
-public class Result implements Parcelable {
+public class VideoResult implements Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -175,10 +175,10 @@ public class Result implements Parcelable {
         dest.writeString(this.type);
     }
 
-    public Result() {
+    public VideoResult() {
     }
 
-    protected Result(Parcel in) {
+    protected VideoResult(Parcel in) {
         this.id = in.readString();
         this.iso6391 = in.readString();
         this.key = in.readString();
@@ -188,15 +188,15 @@ public class Result implements Parcelable {
         this.type = in.readString();
     }
 
-    public static final Parcelable.Creator<Result> CREATOR = new Parcelable.Creator<Result>() {
+    public static final Parcelable.Creator<VideoResult> CREATOR = new Parcelable.Creator<VideoResult>() {
         @Override
-        public Result createFromParcel(Parcel source) {
-            return new Result(source);
+        public VideoResult createFromParcel(Parcel source) {
+            return new VideoResult(source);
         }
 
         @Override
-        public Result[] newArray(int size) {
-            return new Result[size];
+        public VideoResult[] newArray(int size) {
+            return new VideoResult[size];
         }
     };
 }

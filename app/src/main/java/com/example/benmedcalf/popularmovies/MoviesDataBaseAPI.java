@@ -1,7 +1,8 @@
 package com.example.benmedcalf.popularmovies;
 
-import com.example.benmedcalf.popularmovies.Model.Example;
-import com.example.benmedcalf.popularmovies.Model.Video;
+import com.example.benmedcalf.popularmovies.Model.MovieResult;
+import com.example.benmedcalf.popularmovies.Model.Reviews;
+import com.example.benmedcalf.popularmovies.Model.Videos;
 
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -19,15 +20,19 @@ public interface MoviesDataBaseAPI {
 
     //Returns JSON for top rated movies
     @GET("movie/top_rated")
-    Call<Example> getTopRated(@Query("api_key") String api_key);
+    Call<MovieResult> getTopRated(@Query("api_key") String api_key);
 
     //Returns JSON for most popular movies
     @GET("movie/popular")
-    Call<Example>  getMostPopular(@Query("api_key") String api_key);
+    Call<MovieResult>  getMostPopular(@Query("api_key") String api_key);
 
     //Returns unique ID for Youtube video
     @GET("movie/{id}/videos")
-    Call<Video> getVideo(@Path("id") Integer movieId, @Query("api_key") String api_key);
+    Call<Videos> getVideo(@Path("id") Integer movieId, @Query("api_key") String api_key);
+
+    // Returns reviews for movies
+    @GET("movie/{id}/reviews")
+    Call<Reviews> getReviews(@Path("id") Integer movieId, @Query("api_key") String api_key);
 
     class Factory {
 

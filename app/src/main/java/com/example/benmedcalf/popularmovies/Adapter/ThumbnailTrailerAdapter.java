@@ -2,20 +2,17 @@ package com.example.benmedcalf.popularmovies.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
-import com.example.benmedcalf.popularmovies.Model.Result;
-import com.example.benmedcalf.popularmovies.R;
+import com.example.benmedcalf.popularmovies.Model.VideoResult;
 import com.google.android.youtube.player.YouTubeIntents;
+import com.example.benmedcalf.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,16 +21,16 @@ import java.util.List;
 
 public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrailerAdapter.TrailerHolder>{
 
-    private List<Result> mTrailerResultsList;
+    private List<VideoResult> mTrailerResultsList;
     private LayoutInflater mInflater;
     private Context mContext;
     public static final String BASE_URL_YOUTUBE_THUMB = "http://img.youtube.com/vi/";
     public static final String THUMB_SIZE_SUFFIX = "/0.jpg";
 
-    public ThumbnailTrailerAdapter(Context context, List<Result> results) {
+    public ThumbnailTrailerAdapter(Context context, List<VideoResult> videoResults) {
         this.mContext = context;
         this.mInflater = LayoutInflater.from(context);
-        this.mTrailerResultsList = results;
+        this.mTrailerResultsList = videoResults;
 
     }
 
@@ -47,18 +44,18 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
     @Override
     public void onBindViewHolder(TrailerHolder holder, int position) {
 
-        final Result result = mTrailerResultsList.get(position);
-        holder.setResult(result);
+        final VideoResult videoResult = mTrailerResultsList.get(position);
+        holder.setResult(videoResult);
 
         Picasso.with(mContext)
-                .load(BASE_URL_YOUTUBE_THUMB + result.getKey() + THUMB_SIZE_SUFFIX)
+                .load(BASE_URL_YOUTUBE_THUMB + videoResult.getKey() + THUMB_SIZE_SUFFIX)
                 .placeholder(R.drawable.ic_thumb_background)
                 .into(holder.mImageView);
 
         holder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = YouTubeIntents.createPlayVideoIntent(mContext, result.getKey());
+                Intent intent = YouTubeIntents.createPlayVideoIntent(mContext, videoResult.getKey());
                 mContext.startActivity(intent);
             }
         });
@@ -71,9 +68,10 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
 
     public class TrailerHolder extends RecyclerView.ViewHolder {
         public ImageView mImageView;
-        public Result mResult;
+        public VideoResult mVideoResult;
 
-        public void setResult(Result result) {mResult = result;}
+        public void setResult(VideoResult videoResult) {
+            mVideoResult = videoResult;}
 
         public TrailerHolder(ImageView itemview) {
             super(itemview);

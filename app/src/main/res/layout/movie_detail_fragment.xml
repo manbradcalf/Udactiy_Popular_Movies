@@ -46,8 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -140,18 +139,48 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="16dp"
                         android:text="@string/trailer"
                         android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="8dp"/>
+                        android:textStyle="bold" />
 
                     <include
-                        layout="@layout/grid_trailers"
-                        android:layout_width="240dp"
+                        layout="@layout/recyclerview_trailers"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center" />
                 </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:cardElevation="6dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="16dp"
+                    android:text="@string/reviews"
+                    android:textSize="24sp"
+                    android:textStyle="bold"/>
+
+                    <include
+                    layout="@layout/recyclerview_reviews"/>
+
+                </LinearLayout>
+
             </android.support.v7.widget.CardView>
 
         </LinearLayout>
