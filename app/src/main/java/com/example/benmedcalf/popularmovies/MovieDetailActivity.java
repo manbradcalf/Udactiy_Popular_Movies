@@ -111,6 +111,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
         mReleaseDate = (TextView) findViewById(R.id.release_date);
         mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
+        mRatingBar.setEnabled(false);
         mTitle.setText(movie.getTitle());
         String releaseDateText = "Released: " + movie.getReleaseDate();
         mReleaseDate.setText(releaseDateText);

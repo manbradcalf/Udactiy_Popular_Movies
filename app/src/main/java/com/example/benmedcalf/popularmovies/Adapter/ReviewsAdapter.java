@@ -36,14 +36,41 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsH
     }
 
     @Override
-    public void onBindViewHolder(ReviewsHolder holder, int position) {
+    public void onBindViewHolder(final ReviewsHolder holder, int position) {
 
         final ReviewResult review = mReviewsList.get(position);
+        final String content = review.getContent();
         holder.setResult(review);
 
         holder.mAuthorTextView.setText(review.getAuthor());
-        holder.mReviewTextView.setText(review.getContent());
+        holder.mReviewTextView.setText(content);
 
+        // Got my answer for this here:
+        // http://stackoverflow.com/questions/3528790/textview-getlinecount-always-0-in-android
+        // TODO: Should probably make a "Read More" button and set ViewGone to T/F instead of setMaxLines
+        holder.mReviewTextView.post(new Runnable() {
+            @Override
+            public void run() {
+                int lineCnt = holder.mReviewTextView.getLineCount();
+                if (lineCnt >= 10) {
+                    holder.setExpandable(true);
+                    holder.mReviewTextView.setMaxLines(10);
+                    holder.mReviewTextView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (holder.mExpandable) {
+                                holder.setExpandable(false);
+                                holder.mReviewTextView.setMaxLines(Integer.MAX_VALUE);
+                            } else {
+                                holder.setExpandable(true);
+                                holder.mReviewTextView.setMaxLines(10);
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
     }
 
     @Override
@@ -56,15 +83,21 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsH
         public TextView mAuthorTextView;
         public TextView mReviewTextView;
         public ReviewResult mReviewResult;
+        public Boolean mExpandable;
 
         public ReviewsHolder(View itemview) {
             super(itemview);
             mAuthorTextView = (TextView) itemview.findViewById(R.id.review_author);
             mReviewTextView = (TextView) itemview.findViewById(R.id.review_text);
+            mExpandable = false;
         }
 
         public void setResult(ReviewResult reviewResult) {
             this.mReviewResult = reviewResult;
+        }
+
+        public void setExpandable(Boolean mExpandable) {
+            this.mExpandable = mExpandable;
         }
 
     }

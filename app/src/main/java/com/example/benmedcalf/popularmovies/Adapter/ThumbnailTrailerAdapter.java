@@ -41,6 +41,7 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
 
     }
 
+
     @Override
     public void onBindViewHolder(TrailerHolder holder, int position) {
 
