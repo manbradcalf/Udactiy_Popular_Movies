@@ -119,13 +119,18 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         // Trailer shiz
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailers_grid);
-        RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
         mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
 
         // Review shiz
         mReviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
         RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getApplicationContext());
         mReviewRecyclerView.setLayoutManager(layoutManagerReviews);
+        mReviewRecyclerView.addItemDecoration(
+                new SimpleDividerItemDecoration(getApplicationContext()));
+
+
+        // TODO: Figure out why this toggle button is fucked up in XML. Its not aligned w title
 
         mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
         if (mToggleButton != null) {
@@ -214,6 +219,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     private void getMovieReviews(Movie movie) {
+
+        // TODO: Add something that checks for no reviews. If no reviews, say "No reviews to show"
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
         Call<Reviews> call = service.getReviews(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
