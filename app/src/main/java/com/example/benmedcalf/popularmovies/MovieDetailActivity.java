@@ -38,6 +38,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static java.security.AccessController.getContext;
+
 
 /**
  * Created by ben.medcalf on 5/8/16.
@@ -99,94 +101,64 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         final Movie movie = intent.getParcelableExtra(EXTRA_MOVIE_ID);
-        String description = movie.getOverview();
-        final String movieTitle = movie.getTitle();
-        final int movieId = movie.getId();
 
-        final SharedPreferences sharedpreferences = getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
-        final Editor editor = sharedpreferences.edit();
-
-        mDescription = (TextView) findViewById(R.id.description);
+        // Movie title
         mTitle = (TextView) findViewById(R.id.movie_title);
-        mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
-        mReleaseDate = (TextView) findViewById(R.id.release_date);
-        mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
-        mRatingBar.setEnabled(false);
         mTitle.setText(movie.getTitle());
+
+        // Poster
+        mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
+        Picasso.with(this)
+                .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
+                .into(mTarget);
+
+        // Release date
+        mReleaseDate = (TextView) findViewById(R.id.release_date);
         String releaseDateText = "Released: " + movie.getReleaseDate();
         mReleaseDate.setText(releaseDateText);
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        mDBHelper = new FavoriteMoviesDBHelper(this);
 
-        // Trailer shiz
+        // Rating bar
+        mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
+        if (mRatingBar != null) {
+            mRatingBar.setEnabled(false);
+        }
+        mRatingBar.setRating(movie.getVoteAverage() / 2);
+
+        // CollapsingToolbarLayout
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+        mCollapsingToolbarLayout.setTitle(movie.getTitle());
+
+        // Favorite Toggle
+        // TODO: Figure out why this toggle button is fucked up in XML. Its not aligned w title
+        mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
+        setFavoriteToggle(movie);
+
+        // Trailers
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailers_grid);
         RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
         mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
 
-        // Review shiz
+        // Reviews
         mReviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
         RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getApplicationContext());
         mReviewRecyclerView.setLayoutManager(layoutManagerReviews);
         mReviewRecyclerView.addItemDecoration(
                 new SimpleDividerItemDecoration(getApplicationContext()));
 
+        // Movie description
+        String description = movie.getOverview();
+        mDescription = (TextView) findViewById(R.id.description);
+        mDescription.setText(description);
 
-        // TODO: Figure out why this toggle button is fucked up in XML. Its not aligned w title
+        getMovieTrailer(movie);
+        getMovieReviews(movie);
+        mDBHelper = new FavoriteMoviesDBHelper(this);
 
-        mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
-        if (mToggleButton != null) {
-            // 0 is default value returned if no movie matches movieTitle key
-            if (sharedpreferences.getInt(movieTitle, 0) == 0) {
-                mToggleButton.setChecked(false);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-            } else {
-                mToggleButton.setChecked(true);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-                editor.putInt(movieTitle, movieId).apply();
-            }
+        setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-            mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-
-                        if (!sharedpreferences.contains(movieTitle)) {
-                            editor.putInt(movieTitle, movieId).commit();
-                            mDBHelper.addMovie(movie);
-                        }
-                    } else {
-                        // TODO: Delete the favored movie if already favored
-                        if (sharedpreferences.contains(movieTitle)) {
-                            sharedpreferences.edit().remove(movieTitle).apply();
-                            mDBHelper.deleteMovie(movieId);
-                        }
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                        editor.remove(movieTitle);
-                    }
-                }
-            });
-        /* Setting Expanded Title Color to transparent here because having the title ellipsized
-        over the poster image looks hella ugly */
-            mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-            mCollapsingToolbarLayout.setTitle(movie.getTitle());
-            mDescription.setText(description);
-            mRatingBar.setRating(movie.getVoteAverage() / 2);
-            getMovieTrailer(movie);
-            getMovieReviews(movie);
-
-            setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
-      /* first answer here
-      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
-            Picasso.with(this)
-                    .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                    .into(mTarget);
-
-            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
-        }
+        Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
     }
 
     @Override
@@ -240,4 +212,46 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void setFavoriteToggle(final Movie movie) {
+
+        final String movieTitle = movie.getTitle();
+        final int movieId = movie.getId();
+
+        final SharedPreferences sharedPreferences = this.getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        if (mToggleButton != null) {
+            // 0 is default value returned if no movie matches movieTitle key
+            if (sharedPreferences.getInt(movieTitle, 0) == 0) {
+                mToggleButton.setChecked(false);
+                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+            } else {
+                mToggleButton.setChecked(true);
+                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                editor.putInt(movieTitle, movieId).apply();
+            }
+
+            mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+
+                        if (!sharedPreferences.contains(movieTitle)) {
+                            editor.putInt(movieTitle, movieId).commit();
+                            mDBHelper.addMovie(movie);
+                        }
+                    } else {
+                        // TODO: Delete the favored movie if already favored
+                        if (sharedPreferences.contains(movieTitle)) {
+                            sharedPreferences.edit().remove(movieTitle).apply();
+                            mDBHelper.deleteMovie(movieId);
+                        }
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                        editor.remove(movieTitle);
+                    }
+                }
+            });
+        }
+    }
 }

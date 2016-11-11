@@ -77,8 +77,6 @@ public class MovieDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         Bundle arguments = getArguments();
-        final SharedPreferences sharedpreferences = getContext().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedpreferences.edit();
 
 
         if (arguments != null) {
@@ -114,34 +112,7 @@ public class MovieDetailFragment extends Fragment {
 
             mDBHelper = new FavoriteMoviesDBHelper(getContext());
             mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
-            if (mToggleButton != null) {
-                // 0 is default value returned if no movie matches movieTitle key
-                if (sharedpreferences.getInt(mMovie.getTitle(), 0) == 0) {
-                    mToggleButton.setChecked(false);
-                    mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                } else {
-                    mToggleButton.setChecked(true);
-                    mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-                    editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
-                }
-                mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-                            if (!sharedpreferences.contains(mMovie.getTitle())) {
-                                mDBHelper.addMovie(mMovie);
-                            }
-                        } else {
-                            mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                            sharedpreferences.edit().remove(mMovie.getTitle()).apply();
-                            mDBHelper.deleteMovie(mMovie.getId());
-                        }
-                    }
-
-                });
-
-            }
+            setFavoriteToggle();
 
 
             if (MainActivity.getTwoPane()) {
@@ -160,4 +131,40 @@ public class MovieDetailFragment extends Fragment {
 
         return inflater.inflate(R.layout.empty_state, container, false);
     }
+
+    private void setFavoriteToggle() {
+
+        final SharedPreferences sharedPreferences = getContext().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        if (mToggleButton != null) {
+            // 0 is default value returned if no movie matches movieTitle key
+            if (sharedPreferences.getInt(mMovie.getTitle(), 0) == 0) {
+                mToggleButton.setChecked(false);
+                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+            } else {
+                mToggleButton.setChecked(true);
+                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
+            }
+            mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                        if (!sharedPreferences.contains(mMovie.getTitle())) {
+                            mDBHelper.addMovie(mMovie);
+                        }
+                    } else {
+                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                        sharedPreferences.edit().remove(mMovie.getTitle()).apply();
+                        mDBHelper.deleteMovie(mMovie.getId());
+                    }
+                }
+
+            });
+
+        }
+    }
+
 }
