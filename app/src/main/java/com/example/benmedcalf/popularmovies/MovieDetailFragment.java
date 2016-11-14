@@ -8,8 +8,11 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.ToolbarWidgetWrapper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,10 +93,8 @@ public class MovieDetailFragment extends Fragment {
 
         if (arguments != null) {
             mMovie = arguments.getParcelable(EXTRA_MOVIE_ID);
-
-            mDBHelper = new FavoriteMoviesDBHelper(getContext());
-
         }
+        mDBHelper = new FavoriteMoviesDBHelper(getContext());
     }
 
     @Override

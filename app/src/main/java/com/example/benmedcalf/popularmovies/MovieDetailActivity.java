@@ -6,8 +6,12 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +33,10 @@ import com.example.benmedcalf.popularmovies.Model.ReviewResult;
 import com.example.benmedcalf.popularmovies.Model.Reviews;
 import com.example.benmedcalf.popularmovies.Model.VideoResult;
 import com.example.benmedcalf.popularmovies.Model.Videos;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -97,68 +105,31 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.movie_detail_fragment);
+        setContentView(R.layout.movie_detail_activity);
+        Movie movie;
 
-        Intent intent = getIntent();
-        final Movie movie = intent.getParcelableExtra(EXTRA_MOVIE_ID);
-
-        // Movie title
-        mTitle = (TextView) findViewById(R.id.movie_title);
-        mTitle.setText(movie.getTitle());
-
-        // Poster
-        mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
-        Picasso.with(this)
-                .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .into(mTarget);
-
-        // Release date
-        mReleaseDate = (TextView) findViewById(R.id.release_date);
-        String releaseDateText = "Released: " + movie.getReleaseDate();
-        mReleaseDate.setText(releaseDateText);
-
-        // Rating bar
-        mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
-        if (mRatingBar != null) {
-            mRatingBar.setEnabled(false);
+        if (savedInstanceState != null) {
+            movie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
+        } else {
+            movie = getIntent().getParcelableExtra(EXTRA_MOVIE_ID);
         }
-        mRatingBar.setRating(movie.getVoteAverage() / 2);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EXTRA_MOVIE_ID, movie);
+        MovieDetailFragment detailFragment = new MovieDetailFragment();
+        detailFragment.setArguments(bundle);
 
-        // CollapsingToolbarLayout
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-        mCollapsingToolbarLayout.setTitle(movie.getTitle());
+        // Commit fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_detail_container, detailFragment,
+                        EXTRA_MOVIE_ID).commit();
 
-        // Favorite Toggle
-        // TODO: Figure out why this toggle button is fucked up in XML. Its not aligned w title
-        mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
-        setFavoriteToggle(movie);
-
-        // Trailers
-        mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailers_grid);
-        RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-        mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
-
-        // Reviews
-        mReviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
-        RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getApplicationContext());
-        mReviewRecyclerView.setLayoutManager(layoutManagerReviews);
-        mReviewRecyclerView.addItemDecoration(
-                new SimpleDividerItemDecoration(getApplicationContext()));
-
-        // Movie description
-        String description = movie.getOverview();
-        mDescription = (TextView) findViewById(R.id.description);
-        mDescription.setText(description);
-
-        getMovieTrailer(movie);
-        getMovieReviews(movie);
-        mDBHelper = new FavoriteMoviesDBHelper(this);
-
-        setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -218,7 +189,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         final int movieId = movie.getId();
 
         final SharedPreferences sharedPreferences = this.getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        final Editor editor = sharedPreferences.edit();
 
         if (mToggleButton != null) {
             // 0 is default value returned if no movie matches movieTitle key
@@ -253,5 +224,41 @@ public class MovieDetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("MovieDetail Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 }
