@@ -6,17 +6,11 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -33,10 +27,6 @@ import com.example.benmedcalf.popularmovies.Model.ReviewResult;
 import com.example.benmedcalf.popularmovies.Model.Reviews;
 import com.example.benmedcalf.popularmovies.Model.VideoResult;
 import com.example.benmedcalf.popularmovies.Model.Videos;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -45,8 +35,6 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static java.security.AccessController.getContext;
 
 
 /**
@@ -59,6 +47,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
+    public Movie mMovie;
+    public MovieDetailFragment mDetailFragment;
     public RecyclerView mTrailerRecyclerView;
     public RecyclerView mReviewRecyclerView;
     public ImageView mPoster;
@@ -106,30 +96,24 @@ public class MovieDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_detail_activity);
-        Movie movie;
 
         if (savedInstanceState != null) {
-            movie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
+            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
         } else {
-            movie = getIntent().getParcelableExtra(EXTRA_MOVIE_ID);
+            mMovie = getIntent().getParcelableExtra(EXTRA_MOVIE_ID);
         }
         Bundle bundle = new Bundle();
-        bundle.putParcelable(EXTRA_MOVIE_ID, movie);
-        MovieDetailFragment detailFragment = new MovieDetailFragment();
-        detailFragment.setArguments(bundle);
+        bundle.putParcelable(EXTRA_MOVIE_ID, mMovie);
+        MovieDetailFragment fragment = new MovieDetailFragment();
+        fragment.setArguments(bundle);
+
 
         // Commit fragment
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.movie_detail_container, detailFragment,
-                        EXTRA_MOVIE_ID).commit();
-
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                .replace(R.id.movie_detail_container, fragment)
+                .commit();
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -226,39 +210,25 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("MovieDetail Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
     @Override
     public void onStart() {
         super.onStart();
+    }
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    @Override
+    public void onResume() {
+        super.onResume();
+//        mDetailFragment.setActionBar();
     }
 
     @Override
     public void onStop() {
         super.onStop();
+    }
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelable(EXTRA_MOVIE_ID, mMovie);
     }
 }

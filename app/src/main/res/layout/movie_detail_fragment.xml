@@ -98,7 +98,8 @@
                         android:layout_height="wrap_content"
                         android:isIndicator="false"
                         android:stepSize="0.5"
-                        android:theme="@style/RatingBar" />
+                        android:paddingLeft="8dp"
+                        />
 
                     <TextView
                         android:id="@+id/release_date"
