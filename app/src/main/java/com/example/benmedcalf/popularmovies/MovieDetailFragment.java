@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,6 +50,7 @@ public class MovieDetailFragment extends Fragment {
     public TextView mReleaseDate;
     public ImageView mPoster;
     public RatingBar mRatingBar;
+    public Toolbar mToolbar;
     public RecyclerView mTrailerRecyclerView;
     public RecyclerView mReviewsRecyclerView;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -90,10 +92,10 @@ public class MovieDetailFragment extends Fragment {
 
         if (arguments != null) {
             mMovie = arguments.getParcelable(EXTRA_MOVIE_ID);
-
-            mDBHelper = new FavoriteMoviesDBHelper(getContext());
-
+        } else {
+            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
         }
+        mDBHelper = new FavoriteMoviesDBHelper(getContext());
     }
 
     @Override
@@ -131,11 +133,20 @@ public class MovieDetailFragment extends Fragment {
 
             //Get and set rating
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
+            if (mRatingBar != null) {
+                mRatingBar.setEnabled(false);
+            }
             mRatingBar.setRating(mMovie.getVoteAverage() / 2);
 
 
             mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
             setFavoriteToggle();
+
+            // Toolbar
+            mToolbar = (Toolbar) rootView.findViewById(R.id.detail_toolbar);
+            mToolbar.setTitle(mMovie.getTitle());
+            ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
+            ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
             // Trailers
             mTrailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_grid);
@@ -163,7 +174,7 @@ public class MovieDetailFragment extends Fragment {
             getMovieTrailer(mMovie);
             getMovieReviews(mMovie);
 
-            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
+//            Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
             return rootView;
         }
 
@@ -244,6 +255,11 @@ public class MovieDetailFragment extends Fragment {
 
             }
         });
+    }
+
+    public void setActionBar() {
+        ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
+        ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 }

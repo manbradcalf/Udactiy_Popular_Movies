@@ -10,9 +10,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -38,8 +36,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static java.security.AccessController.getContext;
-
 
 /**
  * Created by ben.medcalf on 5/8/16.
@@ -51,6 +47,8 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
+    public Movie mMovie;
+    public MovieDetailFragment mDetailFragment;
     public RecyclerView mTrailerRecyclerView;
     public RecyclerView mReviewRecyclerView;
     public ImageView mPoster;
@@ -97,66 +95,23 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.movie_detail_fragment);
+        setContentView(R.layout.movie_detail_activity);
 
-        Intent intent = getIntent();
-        final Movie movie = intent.getParcelableExtra(EXTRA_MOVIE_ID);
-
-        // Movie title
-        mTitle = (TextView) findViewById(R.id.movie_title);
-        mTitle.setText(movie.getTitle());
-
-        // Poster
-        mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
-        Picasso.with(this)
-                .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .into(mTarget);
-
-        // Release date
-        mReleaseDate = (TextView) findViewById(R.id.release_date);
-        String releaseDateText = "Released: " + movie.getReleaseDate();
-        mReleaseDate.setText(releaseDateText);
-
-        // Rating bar
-        mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
-        if (mRatingBar != null) {
-            mRatingBar.setEnabled(false);
+        if (savedInstanceState != null) {
+            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
+        } else {
+            mMovie = getIntent().getParcelableExtra(EXTRA_MOVIE_ID);
         }
-        mRatingBar.setRating(movie.getVoteAverage() / 2);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EXTRA_MOVIE_ID, mMovie);
+        MovieDetailFragment fragment = new MovieDetailFragment();
+        fragment.setArguments(bundle);
 
-        // CollapsingToolbarLayout
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-        mCollapsingToolbarLayout.setTitle(movie.getTitle());
 
-        // Favorite Toggle
-        // TODO: Figure out why this toggle button is fucked up in XML. Its not aligned w title
-        mToggleButton = (ToggleButton) findViewById(R.id.toggle_favorite);
-        setFavoriteToggle(movie);
-
-        // Trailers
-        mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailers_grid);
-        RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-        mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
-
-        // Reviews
-        mReviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
-        RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getApplicationContext());
-        mReviewRecyclerView.setLayoutManager(layoutManagerReviews);
-        mReviewRecyclerView.addItemDecoration(
-                new SimpleDividerItemDecoration(getApplicationContext()));
-
-        // Movie description
-        String description = movie.getOverview();
-        mDescription = (TextView) findViewById(R.id.description);
-        mDescription.setText(description);
-
-        getMovieTrailer(movie);
-        getMovieReviews(movie);
-        mDBHelper = new FavoriteMoviesDBHelper(this);
-
-        setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // Commit fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_detail_container, fragment)
+                .commit();
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
     }
@@ -218,7 +173,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         final int movieId = movie.getId();
 
         final SharedPreferences sharedPreferences = this.getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        final Editor editor = sharedPreferences.edit();
 
         if (mToggleButton != null) {
             // 0 is default value returned if no movie matches movieTitle key
@@ -253,5 +208,27 @@ public class MovieDetailActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        mDetailFragment.setActionBar();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelable(EXTRA_MOVIE_ID, mMovie);
     }
 }
