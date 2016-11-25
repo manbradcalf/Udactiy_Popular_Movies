@@ -3,6 +3,8 @@ package com.example.benmedcalf.popularmovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -188,26 +190,34 @@ public class MovieDetailFragment extends Fragment {
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        final Drawable toggledOnDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null);
+        toggledOnDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+
+        final Drawable toggledOffDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null);
+        toggledOffDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+
         if (mToggleButton != null) {
             // 0 is default value returned if no movie matches movieTitle key
             if (sharedPreferences.getInt(mMovie.getTitle(), 0) == 0) {
                 mToggleButton.setChecked(false);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                mToggleButton.setBackgroundDrawable(toggledOffDrawable);
+
+
             } else {
                 mToggleButton.setChecked(true);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                mToggleButton.setBackgroundDrawable(toggledOnDrawable);
                 editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
             }
             mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                        mToggleButton.setBackgroundDrawable(toggledOnDrawable);
                         if (!sharedPreferences.contains(mMovie.getTitle())) {
                             mDBHelper.addMovie(mMovie);
                         }
                     } else {
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                        mToggleButton.setBackgroundDrawable(toggledOffDrawable);
                         sharedPreferences.edit().remove(mMovie.getTitle()).apply();
                         mDBHelper.deleteMovie(mMovie.getId());
                     }
