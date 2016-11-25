@@ -93,7 +93,7 @@ public class MovieDetailFragment extends Fragment {
         if (arguments != null) {
             mMovie = arguments.getParcelable(EXTRA_MOVIE_ID);
         } else {
-            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
+//            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
         }
         mDBHelper = new FavoriteMoviesDBHelper(getContext());
     }
@@ -142,12 +142,14 @@ public class MovieDetailFragment extends Fragment {
             mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
             setFavoriteToggle();
 
-            // Toolbar
-            mToolbar = (Toolbar) rootView.findViewById(R.id.detail_toolbar);
-            mToolbar.setTitle(mMovie.getTitle());
-            ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
-            ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+            if (!MainActivity.getTwoPane()) {
+                // Toolbar
+                mToolbar = (Toolbar) rootView.findViewById(R.id.detail_toolbar);
+                mToolbar.setTitle(mMovie.getTitle());
+                ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
+                ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
             // Trailers
             mTrailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_grid);
             RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getActivity().getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
