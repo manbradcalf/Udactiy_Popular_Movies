@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -51,6 +52,8 @@ public class MovieDetailFragment extends Fragment {
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public Toolbar mToolbar;
+    public CardView mTrailersCardview;
+    public CardView mReviewsCardview;
     public RecyclerView mTrailerRecyclerView;
     public RecyclerView mReviewsRecyclerView;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -102,7 +105,7 @@ public class MovieDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-            Bundle arguments = getArguments();
+        Bundle arguments = getArguments();
 
 
         if (arguments != null) {
@@ -133,9 +136,7 @@ public class MovieDetailFragment extends Fragment {
 
             //Get and set rating
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
-            if (mRatingBar != null) {
-                mRatingBar.setEnabled(false);
-            }
+            mRatingBar.setEnabled(false);
             mRatingBar.setRating(mMovie.getVoteAverage() / 2);
 
 
@@ -148,12 +149,18 @@ public class MovieDetailFragment extends Fragment {
             ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
             ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-            // Trailers
+            // Trailers CardView
+            mTrailersCardview = (CardView) rootView.findViewById(R.id.cardview_trailers);
+
+            // Trailers RecyclerView
             mTrailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_grid);
             RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getActivity().getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
             mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
 
-            // Reviews
+            // Reviews CardView
+            mReviewsCardview = (CardView) rootView.findViewById(R.id.cardview_reviews);
+
+            // Reviews Recyclerview
             mReviewsRecyclerView = (RecyclerView) rootView.findViewById(R.id.review_recyclerview);
             RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getActivity().getApplicationContext());
             mReviewsRecyclerView.setLayoutManager(layoutManagerReviews);
@@ -225,13 +232,17 @@ public class MovieDetailFragment extends Fragment {
             public void onResponse(Call<Videos> call, final Response<Videos> response) {
 
                 List<VideoResult> videoResults = response.body().getResults();
-                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(getActivity(), videoResults);
-                mTrailerRecyclerView.setAdapter(adapter);
+                if (videoResults.size() != 0) {
+                    ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(getActivity(), videoResults);
+                    mTrailerRecyclerView.setAdapter(adapter);
+                } else {
+                    mTrailersCardview.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onFailure(Call<Videos> call, Throwable t) {
-
+                Log.e(MovieDetailFragment.class.getSimpleName(), "getMovieTrailer call failed", t);
             }
         });
     }
@@ -246,13 +257,17 @@ public class MovieDetailFragment extends Fragment {
             @Override
             public void onResponse(Call<Reviews> call, Response<Reviews> response) {
                 List<ReviewResult> reviewResults = response.body().getResults();
-                ReviewsAdapter adapter = new ReviewsAdapter(getActivity(), reviewResults);
-                mReviewsRecyclerView.setAdapter(adapter);
+                if (reviewResults.size() != 0) {
+                    ReviewsAdapter adapter = new ReviewsAdapter(getActivity(), reviewResults);
+                    mReviewsRecyclerView.setAdapter(adapter);
+                } else {
+                    mReviewsCardview.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onFailure(Call<Reviews> call, Throwable t) {
-
+                Log.e(MovieDetailFragment.class.getSimpleName(), "getMovieReviews call failed", t);
             }
         });
     }
