@@ -3,12 +3,13 @@ package com.example.benmedcalf.popularmovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -52,8 +53,6 @@ public class MovieDetailFragment extends Fragment {
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public Toolbar mToolbar;
-    public CardView mTrailersCardview;
-    public CardView mReviewsCardview;
     public RecyclerView mTrailerRecyclerView;
     public RecyclerView mReviewsRecyclerView;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
@@ -96,7 +95,7 @@ public class MovieDetailFragment extends Fragment {
         if (arguments != null) {
             mMovie = arguments.getParcelable(EXTRA_MOVIE_ID);
         } else {
-            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
+//            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
         }
         mDBHelper = new FavoriteMoviesDBHelper(getContext());
     }
@@ -105,7 +104,7 @@ public class MovieDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Bundle arguments = getArguments();
+            Bundle arguments = getArguments();
 
 
         if (arguments != null) {
@@ -136,31 +135,29 @@ public class MovieDetailFragment extends Fragment {
 
             //Get and set rating
             mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_bar);
-            mRatingBar.setEnabled(false);
+            if (mRatingBar != null) {
+                mRatingBar.setEnabled(false);
+            }
             mRatingBar.setRating(mMovie.getVoteAverage() / 2);
 
 
             mToggleButton = (ToggleButton) rootView.findViewById(R.id.toggle_favorite);
             setFavoriteToggle();
 
-            // Toolbar
-            mToolbar = (Toolbar) rootView.findViewById(R.id.detail_toolbar);
-            mToolbar.setTitle(mMovie.getTitle());
-            ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
-            ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-            // Trailers CardView
-            mTrailersCardview = (CardView) rootView.findViewById(R.id.cardview_trailers);
-
-            // Trailers RecyclerView
+            if (!MainActivity.getTwoPane()) {
+                // Toolbar
+                mToolbar = (Toolbar) rootView.findViewById(R.id.detail_toolbar);
+                mToolbar.setTitle(mMovie.getTitle());
+                ((MovieDetailActivity) getActivity()).setSupportActionBar(mToolbar);
+                ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+            // Trailers
             mTrailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_grid);
             RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getActivity().getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
             mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
 
-            // Reviews CardView
-            mReviewsCardview = (CardView) rootView.findViewById(R.id.cardview_reviews);
-
-            // Reviews Recyclerview
+            // Reviews
             mReviewsRecyclerView = (RecyclerView) rootView.findViewById(R.id.review_recyclerview);
             RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getActivity().getApplicationContext());
             mReviewsRecyclerView.setLayoutManager(layoutManagerReviews);
@@ -193,26 +190,34 @@ public class MovieDetailFragment extends Fragment {
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        final Drawable toggledOnDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null);
+        toggledOnDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+
+        final Drawable toggledOffDrawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null);
+        toggledOffDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+
         if (mToggleButton != null) {
             // 0 is default value returned if no movie matches movieTitle key
             if (sharedPreferences.getInt(mMovie.getTitle(), 0) == 0) {
                 mToggleButton.setChecked(false);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                mToggleButton.setBackgroundDrawable(toggledOffDrawable);
+
+
             } else {
                 mToggleButton.setChecked(true);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                mToggleButton.setBackgroundDrawable(toggledOnDrawable);
                 editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
             }
             mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
+                        mToggleButton.setBackgroundDrawable(toggledOnDrawable);
                         if (!sharedPreferences.contains(mMovie.getTitle())) {
                             mDBHelper.addMovie(mMovie);
                         }
                     } else {
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
+                        mToggleButton.setBackgroundDrawable(toggledOffDrawable);
                         sharedPreferences.edit().remove(mMovie.getTitle()).apply();
                         mDBHelper.deleteMovie(mMovie.getId());
                     }
@@ -232,17 +237,13 @@ public class MovieDetailFragment extends Fragment {
             public void onResponse(Call<Videos> call, final Response<Videos> response) {
 
                 List<VideoResult> videoResults = response.body().getResults();
-                if (videoResults.size() != 0) {
-                    ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(getActivity(), videoResults);
-                    mTrailerRecyclerView.setAdapter(adapter);
-                } else {
-                    mTrailersCardview.setVisibility(View.GONE);
-                }
+                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(getActivity(), videoResults);
+                mTrailerRecyclerView.setAdapter(adapter);
             }
 
             @Override
             public void onFailure(Call<Videos> call, Throwable t) {
-                Log.e(MovieDetailFragment.class.getSimpleName(), "getMovieTrailer call failed", t);
+
             }
         });
     }
@@ -257,17 +258,13 @@ public class MovieDetailFragment extends Fragment {
             @Override
             public void onResponse(Call<Reviews> call, Response<Reviews> response) {
                 List<ReviewResult> reviewResults = response.body().getResults();
-                if (reviewResults.size() != 0) {
-                    ReviewsAdapter adapter = new ReviewsAdapter(getActivity(), reviewResults);
-                    mReviewsRecyclerView.setAdapter(adapter);
-                } else {
-                    mReviewsCardview.setVisibility(View.GONE);
-                }
+                ReviewsAdapter adapter = new ReviewsAdapter(getActivity(), reviewResults);
+                mReviewsRecyclerView.setAdapter(adapter);
             }
 
             @Override
             public void onFailure(Call<Reviews> call, Throwable t) {
-                Log.e(MovieDetailFragment.class.getSimpleName(), "getMovieReviews call failed", t);
+
             }
         });
     }

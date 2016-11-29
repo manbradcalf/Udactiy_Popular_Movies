@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -24,8 +26,8 @@ import android.widget.Toast;
 import com.example.benmedcalf.popularmovies.Adapter.MoviesAdapter;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesContract;
 import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
-import com.example.benmedcalf.popularmovies.Model.MovieResult;
 import com.example.benmedcalf.popularmovies.Model.Movie;
+import com.example.benmedcalf.popularmovies.Model.MovieResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +98,11 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.menu_movies_grid_fragment, menu);
+        Drawable drawable = menu.findItem(R.id.sort_favorite).getIcon();
+        if (drawable != null) {
+            drawable.mutate();
+            drawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+        }
     }
 
     @Override
