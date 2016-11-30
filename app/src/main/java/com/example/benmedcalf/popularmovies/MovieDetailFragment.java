@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -50,6 +51,8 @@ public class MovieDetailFragment extends Fragment {
     public TextView mDescriptionTextView;
     public TextView mTitle;
     public TextView mReleaseDate;
+    public CardView mTrailersCardView;
+    public CardView mReviewsCardView;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public Toolbar mToolbar;
@@ -153,11 +156,13 @@ public class MovieDetailFragment extends Fragment {
                 ((MovieDetailActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
             // Trailers
+            mTrailersCardView = (CardView) rootView.findViewById(R.id.cardview_trailers);
             mTrailerRecyclerView = (RecyclerView) rootView.findViewById(R.id.trailers_grid);
             RecyclerView.LayoutManager layoutManagerTrailers = new LinearLayoutManager(getActivity().getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
             mTrailerRecyclerView.setLayoutManager(layoutManagerTrailers);
 
             // Reviews
+            mReviewsCardView = (CardView) rootView.findViewById(R.id.cardview_reviews);
             mReviewsRecyclerView = (RecyclerView) rootView.findViewById(R.id.review_recyclerview);
             RecyclerView.LayoutManager layoutManagerReviews = new LinearLayoutManager(getActivity().getApplicationContext());
             mReviewsRecyclerView.setLayoutManager(layoutManagerReviews);
@@ -237,8 +242,12 @@ public class MovieDetailFragment extends Fragment {
             public void onResponse(Call<Videos> call, final Response<Videos> response) {
 
                 List<VideoResult> videoResults = response.body().getResults();
-                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(getActivity(), videoResults);
-                mTrailerRecyclerView.setAdapter(adapter);
+                if (videoResults.size() != 0) {
+                    ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(getActivity(), videoResults);
+                    mTrailerRecyclerView.setAdapter(adapter);
+                } else {
+                    mTrailersCardView.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -258,8 +267,13 @@ public class MovieDetailFragment extends Fragment {
             @Override
             public void onResponse(Call<Reviews> call, Response<Reviews> response) {
                 List<ReviewResult> reviewResults = response.body().getResults();
-                ReviewsAdapter adapter = new ReviewsAdapter(getActivity(), reviewResults);
-                mReviewsRecyclerView.setAdapter(adapter);
+                if (reviewResults.size() != 0) {
+                    ReviewsAdapter adapter = new ReviewsAdapter(getActivity(), reviewResults);
+                    mReviewsRecyclerView.setAdapter(adapter);
+                } else {
+                    mReviewsCardView.setVisibility(View.GONE);
+                }
+
             }
 
             @Override
