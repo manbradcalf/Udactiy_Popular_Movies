@@ -2,21 +2,40 @@ package com.example.benmedcalf.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import com.example.benmedcalf.popularmovies.Adapter.ReviewsAdapter;
+import com.example.benmedcalf.popularmovies.Adapter.ThumbnailTrailerAdapter;
+import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
+import com.example.benmedcalf.popularmovies.Model.ReviewResult;
+import com.example.benmedcalf.popularmovies.Model.Reviews;
+import com.example.benmedcalf.popularmovies.Model.VideoResult;
+import com.example.benmedcalf.popularmovies.Model.Videos;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 /**
  * Created by ben.medcalf on 5/8/16.
@@ -28,9 +47,18 @@ public class MovieDetailActivity extends AppCompatActivity {
     public TextView mDescription;
     public TextView mTitle;
     public TextView mReleaseDate;
+    public Movie mMovie;
+    public MovieDetailFragment mDetailFragment;
+    public RecyclerView mTrailerRecyclerView;
+    public RecyclerView mReviewRecyclerView;
     public ImageView mPoster;
     public RatingBar mRatingBar;
     public CollapsingToolbarLayout mCollapsingToolbarLayout;
+    public ToggleButton mToggleButton;
+    public FavoriteMoviesDBHelper mDBHelper;
+
+    private static final String SHARED_PREF = "SHARED_PREF";
+
 
     /* Creating final Target object here to pass to Picasso,
      * in order to prevent the Target
@@ -44,7 +72,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             mPoster.setImageBitmap(bitmap);
-            Log.e("App","Success to load poster in onBitmapLoaded method");
+            Log.e("App", "Success to load poster in onBitmapLoaded method");
         }
 
         @Override
@@ -67,40 +95,23 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.movie_detail_activity);
-        Intent intent = getIntent();
-        Movie movie = intent.getParcelableExtra(EXTRA_MOVIE_ID);
-        String description = movie.getOverview();
 
-        mDescription = (TextView) findViewById(R.id.description);
-        mTitle = (TextView) findViewById(R.id.movie_title);
-        mPoster = (ImageView) findViewById(R.id.movie_poster_detail);
-        mReleaseDate = (TextView) findViewById(R.id.release_date);
-        mRatingBar = (RatingBar) findViewById(R.id.rating_bar);
-
-        mTitle.setText(movie.getTitle());
-        String releaseDateText = "Released: " + movie.getReleaseDate();
-        mReleaseDate.setText(releaseDateText);
-        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-
-        /* Setting Expanded Title Color to transparent here because having the title ellipsized
-        over the poster image looks hella ugly */
-        mCollapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-
-        mCollapsingToolbarLayout.setTitle(movie.getTitle());
-        mDescription.setText(description);
-        mRatingBar.setRating(movie.getVoteAverage()/2);
-
-        setSupportActionBar((Toolbar) findViewById(R.id.detail_toolbar));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (savedInstanceState != null) {
+            mMovie = savedInstanceState.getParcelable(EXTRA_MOVIE_ID);
+        } else {
+            mMovie = getIntent().getParcelableExtra(EXTRA_MOVIE_ID);
+        }
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EXTRA_MOVIE_ID, mMovie);
+        MovieDetailFragment fragment = new MovieDetailFragment();
+        fragment.setArguments(bundle);
 
 
-      /* first answer here
-      http://stackoverflow.com/questions/24682217/get-bitmap-from-imageview-loaded-with-picasso */
-        Picasso.with(this)
-                .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                .into(mTarget);
+        // Commit fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.movie_detail_container, fragment)
+                .commit();
 
         Log.d(MovieDetailActivity.class.getSimpleName(), "Launched Movie Detail Activity");
     }
@@ -113,5 +124,26 @@ public class MovieDetailActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelable(EXTRA_MOVIE_ID, mMovie);
     }
 }

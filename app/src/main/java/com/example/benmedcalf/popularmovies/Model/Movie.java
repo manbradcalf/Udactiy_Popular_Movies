@@ -18,45 +18,60 @@ public class Movie implements Parcelable {
     @SerializedName("poster_path")
     @Expose
     private String posterPath;
+
     @SerializedName("adult")
     @Expose
     private Boolean adult;
+
     @SerializedName("overview")
     @Expose
     private String overview;
+
     @SerializedName("release_date")
     @Expose
     private String releaseDate;
+
     @SerializedName("genre_ids")
     @Expose
     private List<Integer> genreIds = new ArrayList<Integer>();
+
     @SerializedName("id")
     @Expose
     private Integer id;
+
     @SerializedName("original_title")
     @Expose
     private String originalTitle;
+
     @SerializedName("original_language")
     @Expose
     private String originalLanguage;
+
     @SerializedName("title")
     @Expose
     private String title;
+
     @SerializedName("backdrop_path")
     @Expose
     private String backdropPath;
+
     @SerializedName("popularity")
     @Expose
     private Float popularity;
+
     @SerializedName("vote_count")
     @Expose
     private Integer voteCount;
+
     @SerializedName("video")
     @Expose
     private Boolean video;
+
     @SerializedName("vote_average")
     @Expose
     private Float voteAverage;
+
+    private boolean isFavorite;
 
     @Override
     public int describeContents() {
@@ -113,6 +128,15 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
+
+    /**
+     *
+     * @return
+     *      If movie is favorited by user
+     */
+    public boolean isFavorite() {
+        return isFavorite;
+    }
 
     /**
      * 
@@ -247,6 +271,15 @@ public class Movie implements Parcelable {
      */
     public String getOriginalLanguage() {
         return originalLanguage;
+    }
+
+    /**
+     *
+     * @param isFavorite
+     *      Set if movie is favorite
+     */
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 
     /**

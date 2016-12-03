@@ -2,7 +2,11 @@ package com.example.benmedcalf.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -17,12 +21,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.benmedcalf.popularmovies.Model.Example;
+import com.example.benmedcalf.popularmovies.Adapter.MoviesAdapter;
+import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesContract;
+import com.example.benmedcalf.popularmovies.Database.FavoriteMoviesDBHelper;
 import com.example.benmedcalf.popularmovies.Model.Movie;
-import com.squareup.picasso.Picasso;
+import com.example.benmedcalf.popularmovies.Model.MovieResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +42,7 @@ import retrofit2.Response;
 public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     private RecyclerView mRecyclerView;
-    private MoviesAdapter mMoviesAdapter;
+    public MoviesAdapter mMoviesAdapter;
     private List<Movie> mMoviesList;
     private Toolbar mToolbar;
     public static final int SORT_POPULARITY_TAG = 0;
@@ -47,7 +52,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
 
     public MoviesGridFragment() {
-
+        // Fragment constructors are empty
     }
 
     @Override
@@ -65,11 +70,15 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
         View view = inflater.inflate(R.layout.fragment_movie_grid, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.movies_recycler_view);
-
-        //Set up toolbar and make it a SupportActionBar to enable menu options
         mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        mToolbar.setTitle("Popular Movies");
-        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+
+        if (getActivity().findViewById(R.id.two_pane_toolbar) == null) {
+            //Set up toolbar and make it a SupportActionBar to enable menu options
+            mToolbar.setTitle("Popular Movies");
+            ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        } else {
+            mToolbar.setVisibility(View.GONE);
+        }
 
         //Create gridlayoutmanager and set it to the recyclerview
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
@@ -79,20 +88,21 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         mMoviesAdapter = new MoviesAdapter(getContext());
         mRecyclerView.setAdapter(mMoviesAdapter);
 
-        callDB(mSortPreference);
+        callMoviesAPI(mSortPreference);
 
         return view;
 
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.menu_movies_grid_fragment, menu);
+        Drawable drawable = menu.findItem(R.id.sort_favorite).getIcon();
+        if (drawable != null) {
+            drawable.mutate();
+            drawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+        }
     }
 
     @Override
@@ -100,11 +110,15 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         switch (menuItem.getItemId()) {
 
             case R.id.sort_popularity:
-                callDB(SORT_POPULARITY_TAG);
+                callMoviesAPI(SORT_POPULARITY_TAG);
                 return true;
 
             case R.id.sort_rating:
-                callDB(SORT_TOP_RATED_TAG);
+                callMoviesAPI(SORT_TOP_RATED_TAG);
+                return true;
+
+            case R.id.sort_favorite:
+                callDB();
                 return true;
 
             default:
@@ -113,26 +127,26 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         return false;
     }
 
-    private void callDB(int sort_tag) {
+    private void callMoviesAPI(int sortTag) {
 
         MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
 
         if (isOnline(getContext())) {
-            switch (sort_tag) {
+            switch (sortTag) {
                 case SORT_POPULARITY_TAG:
-                    Call<Example> call_popular = service.getMostPopular(BuildConfig.MOVIES_TMDB_API_KEY);
-                    call_popular.enqueue(new Callback<Example>() {
+                    Call<MovieResult> call_popular = service.getMostPopular(BuildConfig.MOVIES_TMDB_API_KEY);
+                    call_popular.enqueue(new Callback<MovieResult>() {
                         @Override
-                        public void onResponse(Call<Example> call, Response<Example> response) {
-                            Example example = response.body();
+                        public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
+                            MovieResult movieResult = response.body();
 
-                            mMoviesList = example.getResults();
+                            mMoviesList = movieResult.getResults();
                             mMoviesAdapter.setMovieList(mMoviesList);
                             mSortPreference = SORT_POPULARITY_TAG;
                         }
 
                         @Override
-                        public void onFailure(Call<Example> call, Throwable t) {
+                        public void onFailure(Call<MovieResult> call, Throwable t) {
                             t.printStackTrace();
                             Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
                             toast.show();
@@ -142,20 +156,20 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
                     break;
 
                 case SORT_TOP_RATED_TAG:
-                    Call<Example> call_top_rated = service.getTopRated(BuildConfig.MOVIES_TMDB_API_KEY);
-                    call_top_rated.enqueue(new Callback<Example>() {
+                    Call<MovieResult> call_top_rated = service.getTopRated(BuildConfig.MOVIES_TMDB_API_KEY);
+                    call_top_rated.enqueue(new Callback<MovieResult>() {
                         @Override
-                        public void onResponse(Call<Example> call, Response<Example> response) {
+                        public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
 
-                            Example example = response.body();
+                            MovieResult movieResult = response.body();
 
-                            mMoviesList = example.getResults();
+                            mMoviesList = movieResult.getResults();
                             mMoviesAdapter.setMovieList(mMoviesList);
                             mSortPreference = SORT_TOP_RATED_TAG;
                         }
 
                         @Override
-                        public void onFailure(Call<Example> call, Throwable t) {
+                        public void onFailure(Call<MovieResult> call, Throwable t) {
                             t.printStackTrace();
                             Toast toast = Toast.makeText(getContext(), "Oops! An error occurred", Toast.LENGTH_SHORT);
                             toast.show();
@@ -176,6 +190,68 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
         }
     }
 
+    private void callDB() {
+
+        List<Movie> moviesList = new ArrayList<>();
+
+        SQLiteDatabase db = new FavoriteMoviesDBHelper(getContext()).getWritableDatabase();
+        String[] projection = {
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_OVERVIEW,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POSTER_PATH,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH,
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_FAVORED
+        };
+
+        String sortOrder =
+                FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE + " DESC";
+
+        Cursor c = db.query(
+                FavoriteMoviesContract.FavoritesEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+
+        int movieIdColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_ID);
+        int titleColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_TITLE);
+        int releaseDateColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_RELEASE_DATE);
+        int backdropPathColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_BACKDROP_PATH);
+        int overviewColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_OVERVIEW);
+        int popularityColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POPULARITY);
+        int voteAverageColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_AVERAGE);
+        int posterPathColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_POSTER_PATH);
+        int voteCountColumn = c.getColumnIndexOrThrow(FavoriteMoviesContract.FavoritesEntry.COLUMN_MOVIE_VOTE_COUNT);
+
+        while (c.moveToNext()) {
+            //The cursor is now set to the right position
+            Movie movie = new Movie();
+
+            movie.setId(c.getInt(movieIdColumn));
+            movie.setTitle(c.getString(titleColumn));
+            movie.setReleaseDate(c.getString(releaseDateColumn));
+            movie.setBackdropPath(c.getString(backdropPathColumn));
+            movie.setOverview(c.getString(overviewColumn));
+            movie.setPopularity(c.getFloat(popularityColumn));
+            movie.setVoteAverage(c.getFloat(voteAverageColumn));
+            movie.setPosterPath(c.getString(posterPathColumn));
+            movie.setVoteCount(c.getInt(voteCountColumn));
+
+            moviesList.add(movie);
+        }
+        c.close();
+        mMoviesList = moviesList;
+        mMoviesAdapter.setMovieList(mMoviesList);
+    }
+
     private boolean isOnline(Context context) {
         ConnectivityManager mngr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = mngr.getActiveNetworkInfo();
@@ -187,77 +263,5 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SORT_TYPE, mSortPreference);
-    }
-
-    /** View Holder Class **/
-
-    public class MovieViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener {
-
-        public ImageView mImageView;
-        public Movie mMovie;
-
-        public void setMovie(Movie movie) {
-            mMovie = movie;
-        }
-
-        public MovieViewHolder(View itemView) {
-            super(itemView);
-            mImageView = (ImageView) itemView.findViewById(R.id.poster_image_view);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Intent intent = MovieDetailActivity.newIntent(getActivity(), mMovie);
-            startActivity(intent);
-        }
-    }
-
-    /** Movies Adapter Class **/
-
-    public class MoviesAdapter
-            extends RecyclerView.Adapter<MoviesGridFragment.MovieViewHolder> {
-
-        private List<Movie> mMovieList;
-        private LayoutInflater mInflater;
-        private Context mContext;
-        public static final String BASE_URL_FOR_IMAGES = "http://image.tmdb.org/t/p/w185/";
-
-
-        public MoviesAdapter(Context context) {
-            this.mContext = context;
-            this.mInflater = LayoutInflater.from(context);
-            this.mMovieList = new ArrayList<>();
-        }
-
-        @Override
-        public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = mInflater.inflate(R.layout.movie_card, parent, false);
-            return new MovieViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(MovieViewHolder holder, int position) {
-
-            Movie movie = mMovieList.get(position);
-            holder.setMovie(movie);
-
-            //Load image
-            Picasso.with(mContext)
-                    .load(BASE_URL_FOR_IMAGES + movie.getPosterPath())
-                    .placeholder(R.color.colorAccent).into(holder.mImageView);
-        }
-
-        @Override
-        public int getItemCount() {
-            return (mMovieList == null) ? 0 : mMovieList.size();
-        }
-
-        public void setMovieList(List<Movie> movieList) {
-            this.mMovieList.clear();
-            this.mMovieList.addAll(movieList);
-            notifyDataSetChanged();
-        }
     }
 }

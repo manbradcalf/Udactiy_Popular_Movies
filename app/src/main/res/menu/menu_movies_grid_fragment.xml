@@ -10,4 +10,10 @@
         android:title="@string/sort_rating_title"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/sort_favorite"
+        android:title="@string/favorites"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/ic_heart_solid"/>
+
+
 </menu>
