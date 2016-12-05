@@ -1,14 +1,19 @@
 package com.example.benmedcalf.popularmovies.Adapter;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.benmedcalf.popularmovies.Model.VideoResult;
+import com.google.android.youtube.player.YouTubeApiServiceUtil;
+import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.example.benmedcalf.popularmovies.R;
 import com.squareup.picasso.Picasso;
@@ -19,7 +24,7 @@ import java.util.List;
  * Created by ben.medcalf on 10/6/16.
  */
 
-public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrailerAdapter.TrailerHolder>{
+public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrailerAdapter.TrailerHolder> {
 
     private List<VideoResult> mTrailerResultsList;
     private LayoutInflater mInflater;
@@ -56,8 +61,16 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
         holder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = YouTubeIntents.createPlayVideoIntent(mContext, videoResult.getKey());
-                mContext.startActivity(intent);
+                final YouTubeInitializationResult result = YouTubeApiServiceUtil.isYouTubeApiServiceAvailable(mContext);
+
+                if (result != YouTubeInitializationResult.SUCCESS) {
+                    //If there are any issues we can show an error dialog.
+                    Toast toast = Toast.makeText(mContext, "Can't play the video without the YouTube App!", Toast.LENGTH_LONG);
+                    toast.show();
+                } else {
+                    Intent intent = YouTubeIntents.createPlayVideoIntent(mContext, videoResult.getKey());
+                    mContext.startActivity(intent);
+                }
             }
         });
     }
@@ -72,7 +85,8 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
         public VideoResult mVideoResult;
 
         public void setResult(VideoResult videoResult) {
-            mVideoResult = videoResult;}
+            mVideoResult = videoResult;
+        }
 
         public TrailerHolder(ImageView itemview) {
             super(itemview);

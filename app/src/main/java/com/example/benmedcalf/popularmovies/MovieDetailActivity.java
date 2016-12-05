@@ -126,90 +126,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void getMovieTrailer(Movie movie) {
-
-        MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
-        Call<Videos> call = service.getVideo(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
-        call.enqueue(new Callback<Videos>() {
-            @Override
-            public void onResponse(Call<Videos> call, final Response<Videos> response) {
-
-                List<VideoResult> videoResults = response.body().getResults();
-                ThumbnailTrailerAdapter adapter = new ThumbnailTrailerAdapter(MovieDetailActivity.this, videoResults);
-                mTrailerRecyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onFailure(Call<Videos> call, Throwable t) {
-
-            }
-        });
-    }
-
-    private void getMovieReviews(Movie movie) {
-
-        // TODO: Add something that checks for no reviews. If no reviews, say "No reviews to show"
-
-        MoviesDataBaseAPI service = MoviesDataBaseAPI.Factory.getInstance();
-        Call<Reviews> call = service.getReviews(movie.getId(), BuildConfig.MOVIES_TMDB_API_KEY);
-        call.enqueue(new Callback<Reviews>() {
-            @Override
-            public void onResponse(Call<Reviews> call, Response<Reviews> response) {
-                List<ReviewResult> reviewResults = response.body().getResults();
-                ReviewsAdapter adapter = new ReviewsAdapter(MovieDetailActivity.this, reviewResults);
-                mReviewRecyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onFailure(Call<Reviews> call, Throwable t) {
-
-            }
-        });
-    }
-
-    private void setFavoriteToggle(final Movie movie) {
-
-        final String movieTitle = movie.getTitle();
-        final int movieId = movie.getId();
-
-        final SharedPreferences sharedPreferences = this.getSharedPreferences(SHARED_PREF, Context.MODE_PRIVATE);
-        final Editor editor = sharedPreferences.edit();
-
-        if (mToggleButton != null) {
-            // 0 is default value returned if no movie matches movieTitle key
-            if (sharedPreferences.getInt(movieTitle, 0) == 0) {
-                mToggleButton.setChecked(false);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-            } else {
-                mToggleButton.setChecked(true);
-                mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-                editor.putInt(movieTitle, movieId).apply();
-            }
-
-            mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_solid, null));
-
-                        if (!sharedPreferences.contains(movieTitle)) {
-                            editor.putInt(movieTitle, movieId).commit();
-                            mDBHelper.addMovie(movie);
-                        }
-                    } else {
-                        // TODO: Delete the favored movie if already favored
-                        if (sharedPreferences.contains(movieTitle)) {
-                            sharedPreferences.edit().remove(movieTitle).apply();
-                            mDBHelper.deleteMovie(movieId);
-                        }
-                        mToggleButton.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_heart_border, null));
-                        editor.remove(movieTitle);
-                    }
-                }
-            });
-        }
-    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -218,7 +134,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-//        mDetailFragment.setActionBar();
     }
 
     @Override
