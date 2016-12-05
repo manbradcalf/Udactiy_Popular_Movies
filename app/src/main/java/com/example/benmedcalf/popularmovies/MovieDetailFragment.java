@@ -206,12 +206,9 @@ public class MovieDetailFragment extends Fragment {
             if (sharedPreferences.getInt(mMovie.getTitle(), 0) == 0) {
                 mToggleButton.setChecked(false);
                 mToggleButton.setBackgroundDrawable(toggledOffDrawable);
-
-
             } else {
                 mToggleButton.setChecked(true);
                 mToggleButton.setBackgroundDrawable(toggledOnDrawable);
-                editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
             }
             mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -219,6 +216,7 @@ public class MovieDetailFragment extends Fragment {
                     if (isChecked) {
                         mToggleButton.setBackgroundDrawable(toggledOnDrawable);
                         if (!sharedPreferences.contains(mMovie.getTitle())) {
+                            editor.putInt(mMovie.getTitle(), mMovie.getId()).apply();
                             mDBHelper.addMovie(mMovie);
                         }
                     } else {
