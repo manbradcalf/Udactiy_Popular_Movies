@@ -8,8 +8,6 @@ import android.view.View;
 
 import com.example.benmedcalf.popularmovies.Event.MovieSelectedEvent;
 import com.example.benmedcalf.popularmovies.Model.Movie;
-import com.google.android.youtube.player.YouTubeApiServiceUtil;
-import com.google.android.youtube.player.YouTubeInitializationResult;
 
 import de.greenrobot.event.EventBus;
 
@@ -27,12 +25,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        final YouTubeInitializationResult result = YouTubeApiServiceUtil.isYouTubeApiServiceAvailable(this);
-
-        if (result != YouTubeInitializationResult.SUCCESS) {
-            //If there are any issues we can show an error dialog.
-            result.getErrorDialog(this, 0).show();
-        }
 
         if (findViewById(R.id.two_pane_toolbar) != null) {
             // The detail container view will be present only in the large-screen

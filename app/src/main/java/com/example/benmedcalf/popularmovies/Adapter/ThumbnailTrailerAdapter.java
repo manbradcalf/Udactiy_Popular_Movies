@@ -1,21 +1,19 @@
 package com.example.benmedcalf.popularmovies.Adapter;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.design.widget.Snackbar;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.example.benmedcalf.popularmovies.Model.VideoResult;
+import com.example.benmedcalf.popularmovies.R;
 import com.google.android.youtube.player.YouTubeApiServiceUtil;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubeIntents;
-import com.example.benmedcalf.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -30,6 +28,7 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
     private LayoutInflater mInflater;
     private Context mContext;
     public static final String BASE_URL_YOUTUBE_THUMB = "http://img.youtube.com/vi/";
+    public static final String BASE_URL_YOUTUBE = "https://www.youtube.com/watch?v=";
     public static final String THUMB_SIZE_SUFFIX = "/0.jpg";
 
     public ThumbnailTrailerAdapter(Context context, List<VideoResult> videoResults) {
@@ -65,8 +64,12 @@ public class ThumbnailTrailerAdapter extends RecyclerView.Adapter<ThumbnailTrail
 
                 if (result != YouTubeInitializationResult.SUCCESS) {
                     //If there are any issues we can show an error dialog.
-                    Toast toast = Toast.makeText(mContext, "Can't play the video without the YouTube App!", Toast.LENGTH_LONG);
-                    toast.show();
+                    String url = BASE_URL_YOUTUBE + videoResult.getKey();
+                    Uri webpage = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+                    if (intent.resolveActivity(mContext.getPackageManager()) != null) {
+                        mContext.startActivity(intent);
+                    }
                 } else {
                     Intent intent = YouTubeIntents.createPlayVideoIntent(mContext, videoResult.getKey());
                     mContext.startActivity(intent);
