@@ -47,6 +47,7 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
     private Toolbar mToolbar;
     public static final int SORT_POPULARITY_TAG = 0;
     public static final int SORT_TOP_RATED_TAG = 1;
+    public static final int SORT_FAVORITE_TAG = 2;
     private int mSortPreference;
     public static final String SORT_TYPE = "SORTTYPE";
 
@@ -176,6 +177,8 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
                         }
                     });
 
+                case SORT_FAVORITE_TAG:
+                    callDB();
             }
         } else {
             Snackbar.make(mRecyclerView, "Unable to connect", Snackbar.LENGTH_LONG)
@@ -192,6 +195,9 @@ public class MoviesGridFragment extends android.support.v4.app.Fragment {
 
     private void callDB() {
 
+        if (mSortPreference != SORT_FAVORITE_TAG) {
+        mSortPreference = SORT_FAVORITE_TAG;
+        }
         List<Movie> moviesList = new ArrayList<>();
 
         SQLiteDatabase db = new FavoriteMoviesDBHelper(getContext()).getWritableDatabase();
