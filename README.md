@@ -15,6 +15,3 @@ buildTypes.each {
 ```
 MyMovieDBApiKey="YOUR KEY HERE"
 ```
-
-
-![Peter don't care](https://media.giphy.com/media/3o84U7E0VzGtGvqv5K/giphy.gif)
